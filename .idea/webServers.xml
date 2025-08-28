@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="fcd0ba9e-be95-4ade-bc54-346bb03b814f" name="SFSServer">
+        <fileTransfer accessType="SFTP" host="apisfs.ru" port="22" sshConfigId="8e5aaaa3-055a-454a-9535-9d0d559959a9" sshConfig="root@apisfs.ru:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
