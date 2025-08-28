@@ -3,9 +3,8 @@
     <output-path>$PROJECT_DIR$/jaroutput</output-path>
     <root id="archive" name="SFSExtensions.jar">
       <element id="module-output" name="SFSExtensions" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../SFSLib/lib/sfs2x.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../SFSLib/lib/sfs2x-lib.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../SFSLib/lib/sfs2x-core.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/sfs2x.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/sfs2x-core.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
