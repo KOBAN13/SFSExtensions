@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="SFSExtensions:jar">
+  <artifact type="jar" build-on-make="true" name="BootstrapExtension:jar">
     <output-path>$PROJECT_DIR$/jaroutput</output-path>
     <root id="archive" name="SFSExtensions.jar">
       <element id="module-output" name="SFSExtensions" />

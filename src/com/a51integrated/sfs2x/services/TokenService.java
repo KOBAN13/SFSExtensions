@@ -1,0 +1,104 @@
+package com.a51integrated.sfs2x.services;
+
+import com.smartfoxserver.v2.db.IDBManager;
+import com.smartfoxserver.v2.exceptions.SFSException;
+
+import java.security.SecureRandom;
+import java.sql.SQLException;
+import java.util.Base64;
+import java.util.Optional;
+
+public class TokenService
+{
+    private final IDBManager dbManager;
+    private final String tableToken;
+    private final int tokenLength;
+    private final int ttlMinutes;
+
+    private final SecureRandom random = new SecureRandom();
+
+    public TokenService(IDBManager dbManager, String tableToken, int tokenLength, int ttlMinutes)
+    {
+        this.dbManager = dbManager;
+        this.tableToken = tableToken;
+        this.tokenLength = tokenLength;
+        this.ttlMinutes = ttlMinutes;
+    }
+
+    public String issueToken(long userId) throws SFSException, SQLException
+    {
+        var token = randomUrlToken(tokenLength);
+
+        var sqlRequest = String.format("INSERT INTO %s (user_id, token, expires_at, created_at) VALUES (?,?, NOW() + INTERVAL ? MINUTE, NOW())", tableToken);
+
+        try (var connection = dbManager.getConnection(); var stmt = connection.prepareStatement(sqlRequest))
+        {
+            stmt.setLong(1, userId);
+            stmt.setString(2, token);
+            //stmt.setInt(3, ttlMinutes);
+            stmt.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            throw new SFSException("Error create token for change password");
+        }
+
+        return token;
+    }
+
+    public Optional<Long> consumeToken(String token) throws SFSException, SQLException
+    {
+        var sqlSelectRequest = String.format("SELECT user_id FROM %s WHERE token = ? AND expires_at > NOW()", tableToken);
+        var sqlRemoveRequest = String.format("DELETE FROM %s WHERE token = ?", tableToken);
+
+        try (var connection = dbManager.getConnection())
+        {
+            connection.setAutoCommit(false);
+
+            try (var stmt = connection.prepareStatement(sqlSelectRequest))
+            {
+                stmt.setString(1, token);
+                var result = stmt.executeQuery();
+
+                if (!result.next())
+                {
+                    connection.rollback();
+                    return Optional.empty();
+                }
+
+                var userId = result.getLong(1);
+
+                try (var deleteStmt = connection.prepareStatement(sqlRemoveRequest))
+                {
+                    deleteStmt.setString(1, token);
+                    deleteStmt.executeUpdate();
+                }
+
+                connection.commit();
+                return Optional.of(userId);
+            }
+
+            catch (SQLException e)
+            {
+                connection.rollback();
+                throw new SFSException("Error consuming token");
+            }
+
+            finally
+            {
+                connection.setAutoCommit(true);
+            }
+        }
+    }
+
+    private String randomUrlToken(int tokenLength)
+    {
+        var arrayByte = new byte[tokenLength];
+        random.nextBytes(arrayByte);
+
+        return Base64
+                .getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(arrayByte);
+    }
+}

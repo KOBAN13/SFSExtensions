@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: 
+Class-Path: sfs2x.jar sfs2x-core.jar
+

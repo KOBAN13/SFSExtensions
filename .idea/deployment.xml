@@ -5,7 +5,7 @@
       <paths name="SFSServer">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/SmartFoxServer_2X/SFS2X/extensions/Authorization" local="$PROJECT_DIR$/jaroutput" web="/" />
+            <mapping deploy="/home/SmartFoxServer_2X/SFS2X/extensions/ServerExtensions" local="$PROJECT_DIR$/jaroutput" web="/" />
           </mappings>
         </serverdata>
       </paths>
