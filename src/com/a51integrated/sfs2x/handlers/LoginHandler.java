@@ -1,5 +1,7 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.models.GameUser;
 import com.a51integrated.sfs2x.services.UserService;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
@@ -13,7 +15,10 @@ import com.smartfoxserver.v2.exceptions.SFSLoginException;
 import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
 import org.mindrot.jbcrypt.BCrypt;
 
-public class LoginEventHandler extends BaseServerEventHandler
+import java.sql.SQLException;
+import java.util.Optional;
+
+public class LoginHandler extends BaseServerEventHandler
 {
     @Override
     public void handleServerEvent(ISFSEvent event) throws SFSException
@@ -22,13 +27,27 @@ public class LoginEventHandler extends BaseServerEventHandler
         var password = (String) event.getParameter(SFSEventParam.LOGIN_PASSWORD);
         var clientUser = (User) event.getParameter(SFSEventParam.USER);
 
+        ISFSObject result = SFSObject.newInstance();
+
         var parentExtension = getParentExtension();
 
         var dataBase = parentExtension.getParentZone().getDBManager();
 
         var users = new UserService(dataBase, parentExtension.getConfigProperties().getProperty("db.table.users", "game_users"));
 
-        var optionalUser = users.findByName(username);
+        Optional<GameUser> optionalUser;
+
+        try
+        {
+            optionalUser = users.findByName(username);
+        }
+        catch (SQLException sqlException)
+        {
+            result.putBool(SFSResponseHelper.OK, false);
+            result.putUtfString(SFSResponseHelper.ERROR, sqlException.getMessage());
+            trace(sqlException);
+            return;
+        }
 
         if (optionalUser.isEmpty() || !BCrypt.checkpw(password, optionalUser.get().password_hash))
         {
@@ -41,13 +60,10 @@ public class LoginEventHandler extends BaseServerEventHandler
 
         var user = optionalUser.get();
 
-        ISFSObject outData = SFSObject.newInstance();
+        result.putLong(SFSResponseHelper.USER_ID, user.id);
+        result.putUtfString(SFSResponseHelper.USER_NAME, user.name);
+        result.putUtfString(SFSResponseHelper.USER_EMAIL, user.email);
 
-        outData.putLong("userId", user.id);
-        outData.putUtfString("username", user.name);
-        outData.putUtfString("email", user.email);
-
-        //В ТЕОРИИ ЭТОТ КОД РАБОТАТЬ НЕ БУДЕТ
-        send(SFSEventParam.LOGIN_OUT_DATA.name(), outData, clientUser);
+        send(SFSResponseHelper.LOGIN_RESULT, result, clientUser);
     }
 }

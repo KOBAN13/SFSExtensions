@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.UserService;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
@@ -7,17 +8,18 @@ import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.SQLException;
+
 public class RegisterHandler extends BaseClientRequestHandler
 {
     @Override
     public void handleClientRequest(User user, ISFSObject sfsObject)
     {
-        var username = sfsObject.getUtfString("username");
-        var email = sfsObject.getUtfString("email");
-        var password = sfsObject.getUtfString("password");
+        var username = sfsObject.getUtfString(SFSResponseHelper.USER_NAME);
+        var email = sfsObject.getUtfString(SFSResponseHelper.USER_EMAIL);
+        var password = sfsObject.getUtfString(SFSResponseHelper.PASSWORD);
 
         ISFSObject result = SFSObject.newInstance();
-        result.putUtfString("cmd", "registerResult");
 
         try
         {
@@ -44,23 +46,27 @@ public class RegisterHandler extends BaseClientRequestHandler
             var passwordHash = BCrypt.hashpw(password, BCrypt.gensalt(12));
             var userId = userService.createUser(username, email, passwordHash);
 
-            result.putBool("ok", true);
-            result.putLong("userId", userId);
-
-            //Надо добавить в users service отдачу эксепшенов
+            result.putBool(SFSResponseHelper.OK, true);
+            result.putLong(SFSResponseHelper.USER_ID, userId);
         }
         catch (IllegalArgumentException iaeException)
         {
-            result.putBool("ok", false);
-            result.putUtfString("error", iaeException.getMessage());
+            result.putBool(SFSResponseHelper.OK, false);
+            result.putUtfString(SFSResponseHelper.ERROR, iaeException.getMessage());
+        }
+        catch (SQLException sqlException)
+        {
+            result.putBool(SFSResponseHelper.OK, false);
+            result.putUtfString(SFSResponseHelper.ERROR, sqlException.getMessage());
+            trace(sqlException);
         }
         catch (Exception exception)
         {
-            result.putBool("ok", false);
-            result.putUtfString("error", "Internal error");
+            result.putBool(SFSResponseHelper.OK, false);
+            result.putUtfString(SFSResponseHelper.ERROR, "Internal error");
             trace(exception);
         }
 
-        send("registerResult", result, user);
+        send(SFSResponseHelper.REGISTER_RESULT, result, user);
     }
 }

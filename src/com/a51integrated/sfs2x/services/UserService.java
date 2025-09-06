@@ -1,6 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
-import com.a51integrated.sfs2x.models.User;
+import com.a51integrated.sfs2x.models.GameUser;
 import com.smartfoxserver.v2.db.IDBManager;
 import com.smartfoxserver.v2.exceptions.SFSException;
 
@@ -18,7 +18,7 @@ public class UserService
         this.tableUser = tableUser;
     }
 
-    public Optional<User> findByName(String username) throws SFSException
+    public Optional<GameUser> findByName(String username) throws SFSException, SQLException
     {
         var sqlRequest = String.format("SELECT id, username, password_hash FROM %s WHERE username = ?", tableUser);
 
@@ -34,11 +34,11 @@ public class UserService
         }
         catch (SQLException e)
         {
-            throw new SFSException("Connection to the database failed dont find user by name " + username);
+            throw new SQLException("Connection to the database failed dont find user by name " + username);
         }
     }
 
-    public Optional<User> findByEmail(String email) throws SFSException
+    public Optional<GameUser> findByEmail(String email) throws SFSException, SQLException
     {
         var sqlRequest = String.format("SELECT id, username, password_hash FROM %s WHERE email = ?", tableUser);
 
@@ -54,11 +54,11 @@ public class UserService
         }
         catch (SQLException e)
         {
-            throw new SFSException("Connection to the database failed dont find user by email " + email);
+            throw new SQLException("Connection to the database failed dont find user by email " + email);
         }
     }
 
-    public long createUser(String username, String email, String password_hash) throws SFSException
+    public long createUser(String username, String email, String password_hash) throws SFSException, SQLException
     {
         var sqlRequest = String.format("INSERT INTO %s (username, email, password_hash, created_at)", tableUser);
 
@@ -78,11 +78,11 @@ public class UserService
         }
         catch (SQLException e)
         {
-            throw new SFSException("Error create user");
+            throw new SQLException("Error create user");
         }
     }
 
-    public void updatePassword(long used_id, String newPasswordHash) throws SFSException
+    public void updatePassword(long used_id, String newPasswordHash) throws SFSException, SQLException
     {
         var sqlRequest = String.format("UPDATE %s SET password_hash = ? WHERE id = ?", tableUser);
 
@@ -94,13 +94,13 @@ public class UserService
         }
         catch (SQLException e)
         {
-            throw new SFSException("Error create user");
+            throw new SQLException("Error create user");
         }
     }
 
-    private User map(ResultSet resultSet) throws SQLException
+    private GameUser map(ResultSet resultSet) throws SQLException
     {
-        return new User(
+        return new GameUser(
                 resultSet.getLong("id"),
                 resultSet.getString("username"),
                 resultSet.getString("email"),
