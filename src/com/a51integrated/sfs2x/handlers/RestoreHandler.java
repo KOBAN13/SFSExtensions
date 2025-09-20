@@ -67,6 +67,7 @@ public class RestoreHandler extends BaseClientRequestHandler
                 var mailService = new MailService(host, port, tls, username, password, from);
 
                 var link = resetPasswordUrl + token;
+
                 var htmlPage = "<p>Для смены пароля перейдите по ссылке:</p><p><a href=\"" + link + "\">" + link + "</a></p>"
                         + "<p>Срок действия ссылки: " + tokenTtlMinutes + " минут.</p>";
 

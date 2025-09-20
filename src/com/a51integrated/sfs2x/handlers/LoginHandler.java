@@ -51,11 +51,11 @@ public class LoginHandler extends BaseServerEventHandler
 
         if (optionalUser.isEmpty() || !BCrypt.checkpw(password, optionalUser.get().password_hash))
         {
-            SFSErrorData errorData = new SFSErrorData(SFSErrorCode.LOGIN_BAD_USERNAME);
+            result.putBool(SFSResponseHelper.OK, false);
+            result.putUtfString(SFSResponseHelper.ERROR, "Invalid username or password");
 
-            errorData.addParameter("Invalid username or password");
-
-            throw new SFSLoginException("Invalid credentials", errorData);
+            trace("Invalid credentials");
+            return;
         }
 
         var user = optionalUser.get();
