@@ -5,9 +5,7 @@ import com.a51integrated.sfs2x.models.GameUser;
 import com.a51integrated.sfs2x.services.UserService;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
-import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
-import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.exceptions.SFSErrorCode;
 import com.smartfoxserver.v2.exceptions.SFSErrorData;
 import com.smartfoxserver.v2.exceptions.SFSException;
@@ -25,9 +23,7 @@ public class LoginHandler extends BaseServerEventHandler
     {
         var username = (String) event.getParameter(SFSEventParam.LOGIN_NAME);
         var password = (String) event.getParameter(SFSEventParam.LOGIN_PASSWORD);
-        var clientUser = (User) event.getParameter(SFSEventParam.USER);
-
-        ISFSObject result = SFSObject.newInstance();
+        var resultLogin = (ISFSObject) event.getParameter(SFSEventParam.LOGIN_OUT_DATA);
 
         var parentExtension = getParentExtension();
 
@@ -43,27 +39,37 @@ public class LoginHandler extends BaseServerEventHandler
         }
         catch (SQLException sqlException)
         {
-            result.putBool(SFSResponseHelper.OK, false);
-            result.putUtfString(SFSResponseHelper.ERROR, sqlException.getMessage());
-            trace(sqlException);
-            return;
+            var error = new SFSErrorData(SFSErrorCode.GENERIC_ERROR);
+            error.addParameter(sqlException.getMessage());
+
+            throw new SFSLoginException("Login failed", error);
         }
 
-        if (optionalUser.isEmpty() || !BCrypt.checkpw(password, optionalUser.get().password_hash))
+        if (optionalUser.isEmpty())
         {
-            result.putBool(SFSResponseHelper.OK, false);
-            result.putUtfString(SFSResponseHelper.ERROR, "Invalid username or password");
+            var errorMessage = String.format("User %s not found", username);
 
-            trace("Invalid credentials");
-            return;
+            var error = new SFSErrorData(SFSErrorCode.LOGIN_BAD_USERNAME);
+            error.addParameter(errorMessage);
+
+            throw new SFSLoginException("Login failed", error);
+        }
+
+        if (!BCrypt.checkpw(password, optionalUser.get().password_hash))
+        {
+            var errorMessage = String.format("incorrect password for the user %s", username);
+
+            var error = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
+            error.addParameter(errorMessage);
+
+            throw new SFSLoginException("Login failed", error);
         }
 
         var user = optionalUser.get();
 
-        result.putLong(SFSResponseHelper.USER_ID, user.id);
-        result.putUtfString(SFSResponseHelper.USER_NAME, user.name);
-        result.putUtfString(SFSResponseHelper.USER_EMAIL, user.email);
-
-        send(SFSResponseHelper.LOGIN_RESULT, result, clientUser);
+        resultLogin.putBool(SFSResponseHelper.OK, true);
+        resultLogin.putLong(SFSResponseHelper.USER_ID, user.id);
+        resultLogin.putUtfString(SFSResponseHelper.USER_NAME, user.name);
+        resultLogin.putUtfString(SFSResponseHelper.USER_EMAIL, user.email);
     }
 }
