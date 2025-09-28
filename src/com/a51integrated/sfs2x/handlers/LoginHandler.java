@@ -1,17 +1,20 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.models.GameUser;
 import com.a51integrated.sfs2x.services.UserService;
+import com.smartfoxserver.bitswarm.sessions.ISession;
+import com.smartfoxserver.v2.api.ISFSApi;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
+import com.smartfoxserver.v2.db.IDBManager;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.exceptions.SFSErrorCode;
 import com.smartfoxserver.v2.exceptions.SFSErrorData;
 import com.smartfoxserver.v2.exceptions.SFSException;
 import com.smartfoxserver.v2.exceptions.SFSLoginException;
 import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -24,12 +27,38 @@ public class LoginHandler extends BaseServerEventHandler
         var username = (String) event.getParameter(SFSEventParam.LOGIN_NAME);
         var password = (String) event.getParameter(SFSEventParam.LOGIN_PASSWORD);
         var resultLogin = (ISFSObject) event.getParameter(SFSEventParam.LOGIN_OUT_DATA);
+        var session = (ISession) event.getParameter(SFSEventParam.SESSION);
 
         var parentExtension = getParentExtension();
 
-        var dataBase = parentExtension.getParentZone().getDBManager();
+        var dbData = DBHelper.getDb(parentExtension);
+        var table = DBHelper.getTable(parentExtension,"db.table.users", "game_users");
 
-        var users = new UserService(dataBase, parentExtension.getConfigProperties().getProperty("db.table.users", "game_users"));
+        var gameUser = getGameUser(dbData, table, username);
+        checkPassword(gameUser, getApi(), session, password, username);
+
+        resultLogin.putLong(SFSResponseHelper.USER_ID, gameUser.id);
+        resultLogin.putUtfString(SFSResponseHelper.USER_NAME, gameUser.name);
+        resultLogin.putUtfString(SFSResponseHelper.USER_EMAIL, gameUser.email);
+    }
+
+    private static void checkPassword(GameUser gameUser, ISFSApi sfsApi, ISession session, String password, String username)
+            throws SFSException
+    {
+        if (!sfsApi.checkSecurePassword(session, gameUser.password_hash, password))
+        {
+            var errorMessage = String.format("incorrect password for the user %s", username);
+
+            var error = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
+            error.addParameter(errorMessage);
+
+            throw new SFSLoginException("Login failed", error);
+        }
+    }
+
+    private static GameUser getGameUser(IDBManager dbData, String table, String username) throws SFSException
+    {
+        var users = new UserService(dbData, table);
 
         Optional<GameUser> optionalUser;
 
@@ -55,21 +84,6 @@ public class LoginHandler extends BaseServerEventHandler
             throw new SFSLoginException("Login failed", error);
         }
 
-        if (!BCrypt.checkpw(password, optionalUser.get().password_hash))
-        {
-            var errorMessage = String.format("incorrect password for the user %s", username);
-
-            var error = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
-            error.addParameter(errorMessage);
-
-            throw new SFSLoginException("Login failed", error);
-        }
-
-        var user = optionalUser.get();
-
-        resultLogin.putBool(SFSResponseHelper.OK, true);
-        resultLogin.putLong(SFSResponseHelper.USER_ID, user.id);
-        resultLogin.putUtfString(SFSResponseHelper.USER_NAME, user.name);
-        resultLogin.putUtfString(SFSResponseHelper.USER_EMAIL, user.email);
+        return optionalUser.get();
     }
 }
