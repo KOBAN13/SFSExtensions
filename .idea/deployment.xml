@@ -6,6 +6,7 @@
         <serverdata>
           <mappings>
             <mapping deploy="/home/SmartFoxServer_2X/SFS2X/extensions/ServerExtensions" local="$PROJECT_DIR$/jaroutput" web="/" />
+            <mapping deploy="/home/SmartFoxServer_2X/SFS2X/extensions/ServerExtensions" local="$PROJECT_DIR$/src/com/a51integrated/sfs2x/config" web="/" />
           </mappings>
         </serverdata>
       </paths>

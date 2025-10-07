@@ -1,43 +1,46 @@
 package com.a51integrated.sfs2x.services;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Properties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MailService
-{
-    private final Session session;
-    private final String from;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-    public MailService(String host, int port, boolean tls, String username, String password, String from)
-    {
-        this.from = from;
+public class MailService {
+    private final String apiKey;
+    private final String apiUrl;
 
-        var properties = new Properties();
-        
-        properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", port);
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", tls ? "true" : "false");
-
-        var authenticator = new Authenticator() {
-          @Override protected PasswordAuthentication getPasswordAuthentication() {
-              return new PasswordAuthentication(username, password);
-          }
-        };
-        
-        this.session = Session.getDefaultInstance(properties, authenticator);
-        
+    public MailService(String apiKey, String apiUrl) {
+        this.apiKey = apiKey;
+        this.apiUrl = apiUrl;
     }
 
-    public void send(String to, String subject, String html) throws MessagingException
+    public String send(String from, String to, String subject, String html) throws IOException, InterruptedException
     {
-        var message = new MimeMessage(session);
+        ObjectMapper mapper = new ObjectMapper();
 
-        message.setFrom(new InternetAddress(from));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        message.setSubject(subject, "UTF-8");
-        message.setContent(html, "text/html; charset=UTF-8");
-        Transport.send(message);
+        var root = mapper.createObjectNode();
+        root.put("from_email", from);
+        root.put("from_name", "Daniil");
+        root.put("to", to);
+        root.put("subject", subject);
+        root.put("text","Hello");
+        root.put("html", html);
+
+        var body = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + apiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        var client = HttpClient.newHttpClient();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        return response.body();
     }
 }

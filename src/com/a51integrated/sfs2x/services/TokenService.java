@@ -29,7 +29,7 @@ public class TokenService
     {
         var token = randomUrlToken(tokenLength);
 
-        var sqlRequest = String.format("INSERT INTO %s (user_id, token, expires_at, created_at) VALUES (?,?, NOW() + INTERVAL ? MINUTE, NOW())", passwordResetTable);
+        var sqlRequest = String.format("INSERT INTO %s (user_id, token, expires_at) VALUES (?,?, NOW() + (? || ' minutes')::INTERVAL)", passwordResetTable);
 
         try (var connection = dbManager.getConnection(); var stmt = connection.prepareStatement(sqlRequest))
         {
@@ -40,7 +40,7 @@ public class TokenService
         }
         catch (SQLException e)
         {
-            throw new SQLException("Error create token for change password");
+            throw new SQLException(e.getMessage());
         }
 
         return token;

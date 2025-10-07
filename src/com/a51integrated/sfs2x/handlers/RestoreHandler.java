@@ -20,16 +20,21 @@ public class RestoreHandler extends BaseClientRequestHandler
         var action = params.getUtfString(SFSResponseHelper.RESTORE_ACTION);
         ISFSObject result = SFSObject.newInstance();
 
+        var toEmail = params.getUtfString(SFSResponseHelper.USER_EMAIL);
+
         result.putUtfString(SFSResponseHelper.RESTORE_ACTION, action);
+        result.putUtfString(SFSResponseHelper.CMD, SFSResponseHelper.REGISTER_RESULT);
 
         try
         {
             var db = getParentExtension().getParentZone().getDBManager();
-
             var config = getParentExtension().getConfigProperties();
 
             var userTable = config.getProperty("db.table.users");
+
             var passwordResetTable = config.getProperty("db.table.reset_tokens");
+
+            var tokenLengthString = config.getProperty("reset.token.length");
 
             var tokenLength = Integer.parseInt(config.getProperty("reset.token.length"));
             var tokenTtlMinutes = Integer.parseInt(config.getProperty("reset.token.ttl.minutes"));
@@ -40,38 +45,48 @@ public class RestoreHandler extends BaseClientRequestHandler
 
             if ("start".equals(action))
             {
-                var email = params.getUtfString(SFSResponseHelper.USER_EMAIL);
-
-                if (email == null || !email.contains("@"))
+                if (toEmail == null || !toEmail.contains("@"))
+                {
+                    trace("Email no valid");
                     throw new IllegalArgumentException("Email is empty or invalid email");
+                }
 
-                var optionalUser = userService.findByEmail(email);
+                var optionalUser = userService.findByEmail(toEmail);
 
                 if (optionalUser.isEmpty())
                 {
                     result.putBool(SFSResponseHelper.OK,false);
-                    result.putUtfString(SFSResponseHelper.ERROR, "Dont find email in register users");
+                    result.putUtfString(SFSResponseHelper.ERROR, "Don't find email in register users");
+
+                    send(SFSResponseHelper.RESTORE_RESULT, result, user);
+
+                    trace("Email no find");
                     return;
                 }
 
                 var id = optionalUser.get().id;
                 var token = tokenService.issueToken(id);
 
-                var host = config.getProperty("mail.host");
-                var port = Integer.parseInt(config.getProperty("mail.port"));
-                var tls = Boolean.parseBoolean(config.getProperty("mail.tls"));
-                var username = config.getProperty("mail.username");
-                var password = config.getProperty("mail.password");
-                var from = config.getProperty("mail.from");
+                var emailFrom = config.getProperty("mail.from");
+                var apiKey = config.getProperty("mail.api.key");
+                var apiUrl = config.getProperty("mail.api.url");
 
-                var mailService = new MailService(host, port, tls, username, password, from);
+                trace(emailFrom);
+                trace(apiKey);
+                trace(apiUrl);
+
+                var mailService = new MailService(apiKey, apiUrl);
 
                 var link = resetPasswordUrl + token;
 
                 var htmlPage = "<p>Для смены пароля перейдите по ссылке:</p><p><a href=\"" + link + "\">" + link + "</a></p>"
                         + "<p>Срок действия ссылки: " + tokenTtlMinutes + " минут.</p>";
 
-                mailService.send(email, "Восстановление пароля", htmlPage);
+
+                trace("Email send");
+
+                var message = mailService.send(emailFrom, toEmail, "Восстановление пароля", htmlPage);
+                trace(message);
             }
             else if ("confirm".equals(action))
             {
@@ -106,20 +121,30 @@ public class RestoreHandler extends BaseClientRequestHandler
 
         catch (IllegalArgumentException iaeException)
         {
+            trace("IllegalArgumentException: " + iaeException.getMessage());
+
             result.putBool(SFSResponseHelper.OK, false);
             result.putUtfString(SFSResponseHelper.ERROR, iaeException.getMessage());
+            send(SFSResponseHelper.RESTORE_RESULT, result, user);
         }
+
         catch (SQLException sqlException)
         {
             result.putBool(SFSResponseHelper.OK, false);
             result.putUtfString(SFSResponseHelper.ERROR, sqlException.getMessage());
-            trace(sqlException);
+
+            trace("SQL" + sqlException.getMessage());
+
+            send(SFSResponseHelper.RESTORE_RESULT, result, user);
         }
         catch (Exception exception)
         {
             result.putBool(SFSResponseHelper.OK, false);
             result.putUtfString(SFSResponseHelper.ERROR, "Internal error");
-            trace(exception);
+
+            trace("expetion" + exception.getMessage());
+
+            send(SFSResponseHelper.RESTORE_RESULT, result, user);
         }
 
         send(SFSResponseHelper.RESTORE_RESULT, result, user);
