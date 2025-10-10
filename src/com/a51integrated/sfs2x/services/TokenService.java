@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.smartfoxserver.v2.db.IDBManager;
 import com.smartfoxserver.v2.exceptions.SFSException;
 
@@ -31,12 +32,12 @@ public class TokenService
 
         var sqlRequest = String.format("INSERT INTO %s (user_id, token, expires_at) VALUES (?,?, NOW() + (? || ' minutes')::INTERVAL)", passwordResetTable);
 
-        try (var connection = dbManager.getConnection(); var stmt = connection.prepareStatement(sqlRequest))
+        try (var statement = DBHelper.getStatement(dbManager, sqlRequest))
         {
-            stmt.setLong(1, userId);
-            stmt.setString(2, token);
-            stmt.setInt(3, ttlMinutes);
-            stmt.executeUpdate();
+            statement.setLong(1, userId);
+            statement.setString(2, token);
+            statement.setInt(3, ttlMinutes);
+            statement.executeUpdate();
         }
         catch (SQLException e)
         {

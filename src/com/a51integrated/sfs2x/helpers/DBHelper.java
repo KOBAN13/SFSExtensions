@@ -5,13 +5,12 @@ import com.smartfoxserver.v2.extensions.SFSExtension;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class DBHelper
 {
-    public static String getTable(SFSExtension parentExtension, String key, String tableName)
+    public static String getProperty(SFSExtension parentExtension, String propertyName)
     {
-        return parentExtension.getConfigProperties().getProperty(key, tableName);
+        return parentExtension.getConfigProperties().getProperty(propertyName);
     }
 
     public static IDBManager getDb(SFSExtension parentExtension)

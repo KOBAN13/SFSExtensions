@@ -23,10 +23,8 @@ public class MailService {
 
         var root = mapper.createObjectNode();
         root.put("from_email", from);
-        root.put("from_name", "Daniil");
         root.put("to", to);
         root.put("subject", subject);
-        root.put("text","Hello");
         root.put("html", html);
 
         var body = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);

@@ -31,7 +31,7 @@ public class RegisterHandler extends BaseClientRequestHandler
             var parentExtension = getParentExtension();
 
             var dbData = DBHelper.getDb(parentExtension);
-            var table = DBHelper.getTable(parentExtension, "db.table.users", "game_users");
+            var table = DBHelper.getProperty(parentExtension, "db.table.users");
 
             var userService = new UserService(dbData, table);
 

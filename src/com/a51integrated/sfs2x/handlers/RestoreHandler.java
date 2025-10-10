@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.MailService;
 import com.a51integrated.sfs2x.services.TokenService;
@@ -8,8 +9,9 @@ import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
-import org.mindrot.jbcrypt.BCrypt;
+import com.smartfoxserver.v2.extensions.SFSExtension;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class RestoreHandler extends BaseClientRequestHandler
@@ -17,136 +19,105 @@ public class RestoreHandler extends BaseClientRequestHandler
     @Override
     public void handleClientRequest(User user, ISFSObject params)
     {
-        var action = params.getUtfString(SFSResponseHelper.RESTORE_ACTION);
-        ISFSObject result = SFSObject.newInstance();
-
-        var toEmail = params.getUtfString(SFSResponseHelper.USER_EMAIL);
-
-        result.putUtfString(SFSResponseHelper.RESTORE_ACTION, action);
-        result.putUtfString(SFSResponseHelper.CMD, SFSResponseHelper.REGISTER_RESULT);
+        ISFSObject result = createResultObject();
 
         try
         {
-            var db = getParentExtension().getParentZone().getDBManager();
-            var config = getParentExtension().getConfigProperties();
+            var toEmail = params.getUtfString(SFSResponseHelper.USER_EMAIL);
 
-            var userTable = config.getProperty("db.table.users");
+            validateEmail(toEmail);
 
-            var passwordResetTable = config.getProperty("db.table.reset_tokens");
+            var parentExtension = getParentExtension();
 
-            var tokenLengthString = config.getProperty("reset.token.length");
-
-            var tokenLength = Integer.parseInt(config.getProperty("reset.token.length"));
-            var tokenTtlMinutes = Integer.parseInt(config.getProperty("reset.token.ttl.minutes"));
-            var resetPasswordUrl = config.getProperty("reset.resetUrlBase");
+            var db = DBHelper.getDb(parentExtension);
+            var userTable = DBHelper.getProperty(parentExtension, "db.table.users");
+            var passwordResetTable = DBHelper.getProperty(parentExtension, "db.table.reset_tokens");
+            var tokenLength = Integer.parseInt(DBHelper.getProperty(parentExtension, "reset.token.length"));
+            var tokenTtlMinutes = Integer.parseInt(DBHelper.getProperty(parentExtension, "reset.token.ttl.minutes"));
+            var resetPasswordUrl = DBHelper.getProperty(parentExtension, "reset.resetUrlBase");
 
             var userService = new UserService(db, userTable);
             var tokenService = new TokenService(db, passwordResetTable, tokenLength, tokenTtlMinutes);
 
-            if ("start".equals(action))
+            var optionalUser = userService.findByEmail(toEmail);
+
+            if (optionalUser.isEmpty())
             {
-                if (toEmail == null || !toEmail.contains("@"))
-                {
-                    trace("Email no valid");
-                    throw new IllegalArgumentException("Email is empty or invalid email");
-                }
-
-                var optionalUser = userService.findByEmail(toEmail);
-
-                if (optionalUser.isEmpty())
-                {
-                    result.putBool(SFSResponseHelper.OK,false);
-                    result.putUtfString(SFSResponseHelper.ERROR, "Don't find email in register users");
-
-                    send(SFSResponseHelper.RESTORE_RESULT, result, user);
-
-                    trace("Email no find");
-                    return;
-                }
-
-                var id = optionalUser.get().id;
-                var token = tokenService.issueToken(id);
-
-                var emailFrom = config.getProperty("mail.from");
-                var apiKey = config.getProperty("mail.api.key");
-                var apiUrl = config.getProperty("mail.api.url");
-
-                trace(emailFrom);
-                trace(apiKey);
-                trace(apiUrl);
-
-                var mailService = new MailService(apiKey, apiUrl);
-
-                var link = resetPasswordUrl + token;
-
-                var htmlPage = "<p>Для смены пароля перейдите по ссылке:</p><p><a href=\"" + link + "\">" + link + "</a></p>"
-                        + "<p>Срок действия ссылки: " + tokenTtlMinutes + " минут.</p>";
-
-
-                trace("Email send");
-
-                var message = mailService.send(emailFrom, toEmail, "Восстановление пароля", htmlPage);
-                trace(message);
+                sendError(result, user, "Don't find email in register users");
+                return;
             }
-            else if ("confirm".equals(action))
-            {
-                var token = params.getUtfString("token");
-                var newPassword = params.getUtfString("newPassword");
 
-                if (token == null || token.length() < 8)
-                    throw new IllegalArgumentException("Bad token");
+            var userId = optionalUser.get().id;
+            var token = tokenService.issueToken(userId);
+            var link = resetPasswordUrl + token;
 
-                if (newPassword == null || newPassword.length() < 6)
-                    throw new IllegalArgumentException("Password is empty or too short");
+            sendResetEmail(parentExtension, toEmail, link, tokenTtlMinutes);
 
-                var optionalIdUser = tokenService.consumeToken(token);
-
-                if (optionalIdUser.isEmpty())
-                {
-                    result.putBool(SFSResponseHelper.OK, false);
-                    result.putUtfString(SFSResponseHelper.ERROR, "Token invalid or expired");
-                }
-                else
-                {
-                    var hash = BCrypt.hashpw(newPassword, BCrypt.gensalt(12));
-                    userService.updatePassword(optionalIdUser.get(), hash);
-                    result.putBool(SFSResponseHelper.OK, true);
-                }
-            }
-            else
-            {
-                throw new IllegalArgumentException("Unknown action: " + action);
-            }
+            result.putBool(SFSResponseHelper.OK, true);
+            result.putUtfString(SFSResponseHelper.USER_EMAIL, toEmail);
         }
-
-        catch (IllegalArgumentException iaeException)
+        catch (IllegalArgumentException ex)
         {
-            trace("IllegalArgumentException: " + iaeException.getMessage());
-
-            result.putBool(SFSResponseHelper.OK, false);
-            result.putUtfString(SFSResponseHelper.ERROR, iaeException.getMessage());
-            send(SFSResponseHelper.RESTORE_RESULT, result, user);
+            trace("Validation error: " + ex.getMessage());
+            sendError(result, user, ex.getMessage());
+            return;
         }
-
-        catch (SQLException sqlException)
+        catch (SQLException ex)
         {
-            result.putBool(SFSResponseHelper.OK, false);
-            result.putUtfString(SFSResponseHelper.ERROR, sqlException.getMessage());
-
-            trace("SQL" + sqlException.getMessage());
-
-            send(SFSResponseHelper.RESTORE_RESULT, result, user);
+            trace("Database error: " + ex.getMessage());
+            sendError(result, user, "Database error");
+            return;
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            result.putBool(SFSResponseHelper.OK, false);
-            result.putUtfString(SFSResponseHelper.ERROR, "Internal error");
-
-            trace("expetion" + exception.getMessage());
-
-            send(SFSResponseHelper.RESTORE_RESULT, result, user);
+            trace("Unhandled error: " + ex.getMessage());
+            sendError(result, user, "Internal error");
+            return;
         }
 
+        send(SFSResponseHelper.RESTORE_RESULT, result, user);
+    }
+
+    private ISFSObject createResultObject()
+    {
+        ISFSObject result = SFSObject.newInstance();
+        result.putUtfString(SFSResponseHelper.CMD, SFSResponseHelper.REGISTER_RESULT);
+        return result;
+    }
+
+    private void validateEmail(String email)
+    {
+        if (email == null || !email.contains("@"))
+        {
+            throw new IllegalArgumentException("Email is empty or invalid");
+        }
+    }
+
+    private void sendResetEmail(
+            SFSExtension parentExtension,
+            String toEmail,
+            String link,
+            int ttlMinutes
+    ) throws IOException, InterruptedException
+    {
+        var emailFrom = DBHelper.getProperty(parentExtension, "mail.from");
+        var apiKey = DBHelper.getProperty(parentExtension, "mail.api.key");
+        var apiUrl = DBHelper.getProperty(parentExtension, "mail.api.url");
+
+        var mailService = new MailService(apiKey, apiUrl);
+        var subject = "Восстановление пароля";
+
+        var html = "<p>Для смены пароля перейдите по ссылке:</p>"
+                + "<p><a href=\"" + link + "\">" + link + "</a></p>"
+                + "<p>Срок действия ссылки: " + ttlMinutes + " минут.</p>";
+
+        mailService.send(emailFrom, toEmail, subject, html);
+    }
+
+    private void sendError(ISFSObject result, User user, String message)
+    {
+        result.putBool(SFSResponseHelper.OK, false);
+        result.putUtfString(SFSResponseHelper.ERROR, message);
         send(SFSResponseHelper.RESTORE_RESULT, result, user);
     }
 }

@@ -32,7 +32,7 @@ public class LoginHandler extends BaseServerEventHandler
         var parentExtension = getParentExtension();
 
         var dbData = DBHelper.getDb(parentExtension);
-        var table = DBHelper.getTable(parentExtension,"db.table.users", "game_users");
+        var table = DBHelper.getProperty(parentExtension,"db.table.users");
 
         var gameUser = getGameUser(dbData, table, username);
         checkPassword(gameUser, getApi(), session, password, username);
