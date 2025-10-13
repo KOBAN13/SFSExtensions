@@ -7,6 +7,7 @@ public class SFSResponseHelper
     public static final String OK = "ok";
     public static final String RESTORE_RESULT = "restoreResult";
     public static final String REGISTER_RESULT = "registerResult";
+    public static final String CHANGE_USER_PRIVILEGE = "changeUserPrivilege";
 
     public static final String USER_ID = "userId";
     public static final String USER_NAME = "username";
