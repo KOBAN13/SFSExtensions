@@ -5,6 +5,7 @@ import com.smartfoxserver.v2.db.IDBManager;
 import com.smartfoxserver.v2.exceptions.SFSException;
 
 import java.security.SecureRandom;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Optional;
@@ -32,7 +33,8 @@ public class TokenService
 
         var sqlRequest = String.format("INSERT INTO %s (user_id, token, expires_at) VALUES (?,?, NOW() + (? || ' minutes')::INTERVAL)", passwordResetTable);
 
-        try (var statement = DBHelper.getStatement(dbManager, sqlRequest))
+        try (var connection = dbManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlRequest))
         {
             statement.setLong(1, userId);
             statement.setString(2, token);
@@ -64,6 +66,7 @@ public class TokenService
                 if (!result.next())
                 {
                     connection.rollback();
+                    stmt.close();
                     return Optional.empty();
                 }
 

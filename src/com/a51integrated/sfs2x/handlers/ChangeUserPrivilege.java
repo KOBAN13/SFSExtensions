@@ -11,6 +11,8 @@ public class ChangeUserPrivilege extends BaseClientRequestHandler
     {
         var userPrivilege = isfsObject.getShort("privilege");
 
+        trace("userPrivilege: " + userPrivilege);
+
         user.setPrivilegeId(userPrivilege);
     }
 }

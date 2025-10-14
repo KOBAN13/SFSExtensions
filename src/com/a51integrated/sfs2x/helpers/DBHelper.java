@@ -17,16 +17,4 @@ public class DBHelper
     {
         return parentExtension.getParentZone().getDBManager();
     }
-
-    public static PreparedStatement getStatement(IDBManager dbManager, String sqlRequest, int statementArgument) throws SQLException
-    {
-        var connection = dbManager.getConnection();
-        return connection.prepareStatement(sqlRequest, statementArgument);
-    }
-
-    public static PreparedStatement getStatement(IDBManager dbManager, String sqlRequest) throws SQLException
-    {
-        var connection = dbManager.getConnection();
-        return connection.prepareStatement(sqlRequest);
-    }
 }

@@ -4,6 +4,7 @@ import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.smartfoxserver.v2.extensions.SFSExtension;
 import com.smartfoxserver.v2.util.TaskScheduler;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,8 @@ public class GlobalMaintenanceExtension extends SFSExtension
 
         var sql = String.format("DELETE FROM %s WHERE expires_at < NOW()", passwordResetTable);
 
-        try(var statement = DBHelper.getStatement(getParentZone().getDBManager(), sql))
+        try(var connection = getParentZone().getDBManager().getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql))
         {
             statement.executeUpdate();
         }

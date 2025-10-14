@@ -17,6 +17,7 @@ import com.smartfoxserver.v2.exceptions.SFSErrorData;
 import com.smartfoxserver.v2.exceptions.SFSException;
 import com.smartfoxserver.v2.exceptions.SFSLoginException;
 import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
+import com.smartfoxserver.v2.security.DefaultPermissionProfile;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -38,6 +39,8 @@ public class LoginHandler extends BaseServerEventHandler
 
         var gameUser = getGameUser(dbData, table, username);
         checkPassword(gameUser, getApi(), session, password, username);
+
+        session.setProperty("$permission", DefaultPermissionProfile.STANDARD);
 
         resultLogin.putLong(SFSResponseHelper.USER_ID, gameUser.id);
         resultLogin.putUtfString(SFSResponseHelper.USER_NAME, gameUser.name);

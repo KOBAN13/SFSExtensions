@@ -37,7 +37,8 @@ public class UserService
     {
         var sqlRequest = String.format("INSERT INTO %s (username, email, password_hash) VALUES (?, ?, ?)", tableUser);
 
-        try(var statement = DBHelper.getStatement(dbManager, sqlRequest, Statement.RETURN_GENERATED_KEYS))
+        try(var connection = dbManager.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sqlRequest, Statement.RETURN_GENERATED_KEYS))
         {
             statement.setString(1, username);
             statement.setString(2, email);
@@ -61,7 +62,8 @@ public class UserService
     {
         var sqlRequest = String.format("UPDATE %s SET password_hash = ? WHERE id = ?", tableUser);
 
-        try (var statement = DBHelper.getStatement(dbManager, sqlRequest))
+        try(var connection = dbManager.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sqlRequest))
         {
             statement.setString(1, newPasswordHash);
             statement.setLong(2, used_id);
@@ -75,7 +77,8 @@ public class UserService
 
     private Optional<GameUser> findUserByDetails(String sqlRequest, String details) throws SFSException, SQLException
     {
-        try(var statement = DBHelper.getStatement(dbManager, sqlRequest))
+        try(var connection = dbManager.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sqlRequest))
         {
             statement.setString(1, details);
             var rs = statement.executeQuery();
