@@ -1,10 +1,9 @@
 <component name="libraryTable">
   <library name="sfs2x">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/sfs2x.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/sfs2x-core.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jbcrypt-0.4.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/sendgrid-java.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jarlib/jackson-databind-2.16.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jarlib/sfs2x.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jarlib/sfs2x-core.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

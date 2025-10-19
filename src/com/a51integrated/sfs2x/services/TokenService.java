@@ -1,6 +1,5 @@
 package com.a51integrated.sfs2x.services;
 
-import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.smartfoxserver.v2.db.IDBManager;
 import com.smartfoxserver.v2.exceptions.SFSException;
 
