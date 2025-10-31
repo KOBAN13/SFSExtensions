@@ -21,9 +21,11 @@ public class GlobalMaintenanceExtension extends SFSExtension
     {
         TaskScheduler scheduler = new TaskScheduler(4);
 
-        scheduler.scheduleAtFixedRate(new Runnable() {
+        scheduler.scheduleAtFixedRate(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 ClearExpiredTokens();
             }
         }, 0, 60, TimeUnit.MINUTES);
@@ -31,8 +33,6 @@ public class GlobalMaintenanceExtension extends SFSExtension
 
     private void ClearExpiredTokens()
     {
-        trace("Clear Expired Tokens");
-
         var passwordResetTable = getConfigProperties().getProperty("db.table.reset_tokens");
 
         var sql = String.format("DELETE FROM %s WHERE expires_at < NOW()", passwordResetTable);

@@ -8,11 +8,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class MailService {
+public class MailService
+{
     private final String apiKey;
     private final String apiUrl;
 
-    public MailService(String apiKey, String apiUrl) {
+    public MailService(String apiKey, String apiUrl)
+    {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
     }
