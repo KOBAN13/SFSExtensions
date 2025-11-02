@@ -1,52 +1,64 @@
 package com.a51integrated.sfs2x.handlers;
 
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 
-public class KickPlayerHandler extends BaseClientRequestHandler
-{
+public class KickPlayerHandler extends BaseClientRequestHandler {
+
     @Override
     public void handleClientRequest(User sender, ISFSObject params)
     {
-        var room = sender.getLastJoinedRoom();
-        var ownerVariables = sender.getVariable("ownerId");
         var resultObject = new SFSObject();
+        var room = sender.getLastJoinedRoom();
 
-        if(ownerVariables == null)
+        if (!isRoomOwner(sender))
         {
-            send(SFSResponseHelper.KICK_USER, resultObject, sender);
-            return;
-        }
-        var ownerId = ownerVariables.getIntValue();
-
-        if (sender.getId() != ownerId)
-        {
-            resultObject.putUtfString(SFSResponseHelper.ERROR, "Only owner can be kicked.");
-            resultObject.putBool(SFSResponseHelper.OK, false);
-
-            send(SFSResponseHelper.KICK_USER, resultObject, sender);
+            sendError(resultObject, "Only owner can kick players.", sender);
             return;
         }
 
-        var targetId = params.getInt("targetId");
-        var targetUser = getParentExtension().getParentZone().getUserById(targetId);
+        var targetUser = getTargetUser(params, room);
 
-        if (targetUser == null || !room.containsUser(targetUser))
+        if (targetUser == null)
         {
-            resultObject.putUtfString(SFSResponseHelper.ERROR, "Target User not found.");
-            resultObject.putBool(SFSResponseHelper.OK, false);
-
-            send(SFSResponseHelper.KICK_USER, resultObject, sender);
+            sendError(resultObject, "Target user not found.", sender);
             return;
         }
 
         getApi().kickUser(targetUser, null, "Kicked by room owner", 0);
+        sendSuccess(resultObject, targetUser.getId(), sender);
+    }
 
-        resultObject.putInt("kickedId", targetId);
+    private boolean isRoomOwner(User sender)
+    {
+        var ownerVar = sender.getVariable("ownerId");
+        return ownerVar != null && sender.getId() == ownerVar.getIntValue();
+    }
+
+    private User getTargetUser(ISFSObject params, Room room)
+    {
+        var targetId = params.getInt("targetId");
+        var targetUser = getParentExtension().getParentZone().getUserById(targetId);
+
+        return (targetUser != null && room.containsUser(targetUser)) ? targetUser : null;
+    }
+
+    private void sendError(SFSObject resultObject, String message, User sender)
+    {
+        resultObject.putUtfString(SFSResponseHelper.ERROR, message);
+        resultObject.putBool(SFSResponseHelper.OK, false);
+        send(SFSResponseHelper.KICK_USER, resultObject, sender);
+    }
+
+    private void sendSuccess(SFSObject resultObject, int kickedId, User sender)
+    {
+        resultObject.putInt("kickedId", kickedId);
         resultObject.putBool(SFSResponseHelper.OK, true);
         send(SFSResponseHelper.PLAYER_KICKED, resultObject, sender);
     }
 }
+

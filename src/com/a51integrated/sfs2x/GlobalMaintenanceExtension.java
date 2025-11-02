@@ -1,6 +1,5 @@
 package com.a51integrated.sfs2x;
 
-import com.a51integrated.sfs2x.helpers.DBHelper;
 import com.smartfoxserver.v2.extensions.SFSExtension;
 import com.smartfoxserver.v2.util.TaskScheduler;
 
