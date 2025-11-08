@@ -1,18 +1,17 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.Utils.ERoomRole;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.services.RoleService;
 import com.smartfoxserver.v2.api.CreateRoomSettings;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.SFSRoomRemoveMode;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
-import com.smartfoxserver.v2.entities.variables.SFSRoomVariable;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
 import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
-
-import java.util.List;
 
 public class CreateLobbyHandler extends BaseClientRequestHandler {
     private static final String GAME_ROOMS_GROUP_NAME = "Games";
@@ -28,14 +27,15 @@ public class CreateLobbyHandler extends BaseClientRequestHandler {
             var api = getApi();
 
             var room = api.createRoom(getParentExtension().getParentZone(), roomSettings, sender);
+            RoleService.assignRole(room, sender, ERoomRole.OWNER);
             api.joinRoom(sender, room, roomSettings.getPassword(), false, null, true, true);
 
             sendSuccess(resultObject, room, sender);
 
         } catch (SFSCreateRoomException | SFSJoinRoomException exception)
         {
-            trace("Error creating or joining Lobby room", exception);
-            sendError(resultObject, "Error creating Lobby room", sender);
+            trace("Error creating or joining room", exception);
+            sendError(resultObject, "Error creating or joining room", sender);
         }
     }
 
@@ -57,10 +57,6 @@ public class CreateLobbyHandler extends BaseClientRequestHandler {
             roomSettings.setPassword(roomPassword);
         }
 
-        var roomVariables = new SFSRoomVariable("ownerId", sender.getId());
-
-        roomSettings.setRoomVariables(List.of(roomVariables));
-
         roomSettings.setExtension(new CreateRoomSettings.RoomExtensionSettings(
                 "ServerExtensions",
                 "com.a51integrated.sfs2x.LobbyExtension"
@@ -71,8 +67,11 @@ public class CreateLobbyHandler extends BaseClientRequestHandler {
 
     private void sendSuccess(SFSObject resultObject, Room room, User sender)
     {
+        var role = RoleService.getRole(room, sender);
+
         resultObject.putBool(SFSResponseHelper.OK, true);
         resultObject.putUtfString("roomName", room.getName());
+        resultObject.putUtfString("role", role.name());
         resultObject.putInt("roomId", room.getId());
         send(SFSResponseHelper.CREATE_ROOM, resultObject, sender);
     }

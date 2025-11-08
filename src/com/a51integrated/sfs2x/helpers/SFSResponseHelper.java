@@ -18,4 +18,6 @@ public class SFSResponseHelper
     public static final String PLAYER_KICKED = "playerKicked";
     public static final String UPDATE_LOBBY_DATA = "updateLobbyData";
     public static final String CREATE_ROOM = "createLobby";
+    public static final String JOIN_ROOM = "joinRoom";
+    public static final String ROOM_JOIN = "roomJoin";
 }

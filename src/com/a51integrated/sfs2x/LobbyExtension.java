@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x;
 
+import com.a51integrated.sfs2x.handlers.JoinRoomHandler;
 import com.a51integrated.sfs2x.handlers.KickPlayerHandler;
 import com.a51integrated.sfs2x.handlers.UpdateLobbyHandler;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;

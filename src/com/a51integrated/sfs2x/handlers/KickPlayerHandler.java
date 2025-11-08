@@ -1,6 +1,7 @@
 package com.a51integrated.sfs2x.handlers;
 
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.services.RoleService;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
@@ -15,7 +16,7 @@ public class KickPlayerHandler extends BaseClientRequestHandler {
         var resultObject = new SFSObject();
         var room = sender.getLastJoinedRoom();
 
-        if (!isRoomOwner(sender))
+        if (!RoleService.isOwner(room, sender))
         {
             sendError(resultObject, "Only owner can kick players.", sender);
             return;
@@ -31,12 +32,6 @@ public class KickPlayerHandler extends BaseClientRequestHandler {
 
         getApi().kickUser(targetUser, null, "Kicked by room owner", 0);
         sendSuccess(resultObject, targetUser.getId(), sender);
-    }
-
-    private boolean isRoomOwner(User sender)
-    {
-        var ownerVar = sender.getVariable("ownerId");
-        return ownerVar != null && sender.getId() == ownerVar.getIntValue();
     }
 
     private User getTargetUser(ISFSObject params, Room room)
