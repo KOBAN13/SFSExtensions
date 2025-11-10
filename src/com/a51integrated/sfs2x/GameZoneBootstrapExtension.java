@@ -16,7 +16,7 @@ public class GameZoneBootstrapExtension extends SFSExtension
         addEventHandler(SFSEventType.USER_LOGIN, LoginHandler.class);
         addRequestHandler(SFSResponseHelper.CHANGE_USER_PRIVILEGE, ChangeUserPrivilege.class);
         addRequestHandler(SFSResponseHelper.CREATE_ROOM, CreateLobbyHandler.class);
-        addRequestHandler(SFSResponseHelper.JOIN_ROOM, JoinRoomHandler.class);
+        addRequestHandler(SFSResponseHelper.USER_JOIN_ROOM, JoinRoomHandler.class);
     }
 
     @Override
