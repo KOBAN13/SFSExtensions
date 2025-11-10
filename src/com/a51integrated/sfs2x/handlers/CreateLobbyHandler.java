@@ -1,8 +1,6 @@
 package com.a51integrated.sfs2x.handlers;
 
-import com.a51integrated.sfs2x.Utils.ERoomRole;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
-import com.a51integrated.sfs2x.services.RoleService;
 import com.smartfoxserver.v2.api.CreateRoomSettings;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.SFSRoomRemoveMode;
@@ -12,6 +10,8 @@ import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
 import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
+import koban.roomModule.ERoomRole;
+import koban.roomModule.RoleService;
 
 public class CreateLobbyHandler extends BaseClientRequestHandler {
     private static final String GAME_ROOMS_GROUP_NAME = "Games";

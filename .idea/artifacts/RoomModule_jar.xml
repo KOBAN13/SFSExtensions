@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="RoomModule:jar">
+    <output-path>$PROJECT_DIR$/jaroutput/Room</output-path>
+    <root id="archive" name="RoomModule.jar">
+      <element id="module-output" name="RoomModule" />
+    </root>
+  </artifact>
+</component>

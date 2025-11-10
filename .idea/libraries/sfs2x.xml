@@ -6,6 +6,7 @@
       <root url="jar://$PROJECT_DIR$/lib/jarlib/jackson-databind-2.16.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/jarlib/jackson-core-2.17.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/jarlib/jackson-annotations-2.17.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jaroutput/Room/RoomModule.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

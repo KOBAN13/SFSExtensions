@@ -1,6 +1,5 @@
-package com.a51integrated.sfs2x.services;
+package koban.roomModule;
 
-import com.a51integrated.sfs2x.Utils.ERoomRole;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 
