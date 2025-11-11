@@ -14,7 +14,7 @@ public class SFSResponseHelper
     public static final String PASSWORD = "password";
     public static final String USER_EMAIL = "email";
 
-    public static final String KICK_USER = "kickUser";
+    public static final String KICK_USER_IN_ROOM = "kickUserInRoom";
     public static final String PLAYER_KICKED = "playerKicked";
     public static final String UPDATE_LOBBY_DATA = "updateLobbyData";
     public static final String CREATE_ROOM = "createLobby";

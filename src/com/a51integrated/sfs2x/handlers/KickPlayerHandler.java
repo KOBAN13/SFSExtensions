@@ -30,8 +30,8 @@ public class KickPlayerHandler extends BaseClientRequestHandler {
             return;
         }
 
-        getApi().kickUser(targetUser, null, "Kicked by room owner", 0);
-        sendSuccess(resultObject, targetUser.getId(), sender);
+        getApi().leaveRoom(targetUser, room);
+        sendSuccess(resultObject, targetUser.getId(), targetUser);
     }
 
     private User getTargetUser(ISFSObject params, Room room)
@@ -46,14 +46,13 @@ public class KickPlayerHandler extends BaseClientRequestHandler {
     {
         resultObject.putUtfString(SFSResponseHelper.ERROR, message);
         resultObject.putBool(SFSResponseHelper.OK, false);
-        send(SFSResponseHelper.KICK_USER, resultObject, sender);
+        send(SFSResponseHelper.KICK_USER_IN_ROOM, resultObject, sender);
     }
 
-    private void sendSuccess(SFSObject resultObject, int kickedId, User sender)
+    private void sendSuccess(SFSObject resultObject, int kickedId, User targetUser)
     {
-        resultObject.putInt("kickedId", kickedId);
         resultObject.putBool(SFSResponseHelper.OK, true);
-        send(SFSResponseHelper.PLAYER_KICKED, resultObject, sender);
+        send(SFSResponseHelper.KICK_USER_IN_ROOM, resultObject, targetUser);
     }
 }
 

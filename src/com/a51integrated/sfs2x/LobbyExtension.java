@@ -12,7 +12,7 @@ public class LobbyExtension extends SFSExtension
     @Override
     public void init()
     {
-        addRequestHandler(SFSResponseHelper.KICK_USER, KickPlayerHandler.class);
+        addRequestHandler(SFSResponseHelper.KICK_USER_IN_ROOM, KickPlayerHandler.class);
         addRequestHandler(SFSResponseHelper.UPDATE_LOBBY_DATA, UpdateLobbyHandler.class);
 
         addEventHandler(SFSEventType.USER_JOIN_ROOM, RoomJoinServerEventHandler.class);
