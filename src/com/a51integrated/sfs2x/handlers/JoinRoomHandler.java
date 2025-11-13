@@ -28,6 +28,12 @@ public class JoinRoomHandler extends BaseClientRequestHandler
             return;
         }
 
+        if (room.isPasswordProtected() && room.getPassword().equals(roomPassword))
+        {
+            sendError(result, "Wrong Password", sender);
+            return;
+        }
+
         try
         {
             getApi().joinRoom(sender, room, roomPassword, false, null, true, true);

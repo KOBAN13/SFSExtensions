@@ -2,11 +2,11 @@ package com.a51integrated.sfs2x.handlers;
 
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.smartfoxserver.v2.entities.Room;
-import com.smartfoxserver.v2.entities.SFSRoomRemoveMode;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
+import koban.roomModule.RoleService;
 
 public class UpdateLobbyHandler extends BaseClientRequestHandler
 {
@@ -16,11 +16,7 @@ public class UpdateLobbyHandler extends BaseClientRequestHandler
         var room = sender.getLastJoinedRoom();
         var resultObject = new SFSObject();
 
-        var ownerVariables = room.getVariable("ownerId");
-
-        var ownerId = ownerVariables.getIntValue();
-
-        if (sender.getId() != ownerId)
+        if (RoleService.isOwner(room, sender))
         {
             resultObject.putUtfString(SFSResponseHelper.ERROR, "Only owner can update lobby data");
             send(SFSResponseHelper.UPDATE_LOBBY_DATA, resultObject, sender);
@@ -28,6 +24,11 @@ public class UpdateLobbyHandler extends BaseClientRequestHandler
         }
 
         ChangeRoomSettings(params, room);
+
+        var usersInRoom = room.getUserList();
+
+        resultObject.putUtfString(SFSResponseHelper.OK, "OK");
+        send(SFSResponseHelper.UPDATE_LOBBY_DATA, resultObject, usersInRoom);
     }
 
     private static void ChangeRoomSettings(ISFSObject params, Room room)
