@@ -7,13 +7,16 @@ import com.smartfoxserver.v2.entities.SFSRoomRemoveMode;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
+import com.smartfoxserver.v2.entities.variables.SFSRoomVariable;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
 import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
+import com.smartfoxserver.v2.exceptions.SFSVariableException;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import koban.roomModule.ERoomRole;
 import koban.roomModule.RoleService;
 
-public class CreateLobbyHandler extends BaseClientRequestHandler {
+public class CreateLobbyHandler extends BaseClientRequestHandler
+{
     private static final String GAME_ROOMS_GROUP_NAME = "Games";
 
     @Override
@@ -23,27 +26,42 @@ public class CreateLobbyHandler extends BaseClientRequestHandler {
 
         try
         {
-            var roomSettings = buildRoomSettings(sender, params);
+            var roomSettings = buildRoomSettings(params);
             var api = getApi();
 
             var room = api.createRoom(getParentExtension().getParentZone(), roomSettings, sender);
             RoleService.assignRole(room, sender, ERoomRole.OWNER);
             api.joinRoom(sender, room, roomSettings.getPassword(), false, null, true, true);
 
+            var lobbyRoomVariable = new SFSRoomVariable("gameStarted", false);
+            lobbyRoomVariable.setPrivate(true);
+            lobbyRoomVariable.setGlobal(false);
+            lobbyRoomVariable.setPersistent(true);
+
+            room.setVariable(lobbyRoomVariable);
+
             sendSuccess(resultObject, room, sender);
 
-        } catch (SFSCreateRoomException | SFSJoinRoomException exception)
+        } catch (SFSCreateRoomException | SFSJoinRoomException | SFSVariableException exception)
         {
             trace("Error creating or joining room", exception);
             sendError(resultObject, "Error creating or joining room", sender);
         }
     }
 
-    private CreateRoomSettings buildRoomSettings(User sender, ISFSObject params)
+    private CreateRoomSettings buildRoomSettings(ISFSObject params)
     {
-        var roomName = params.containsKey("roomName") ? params.getUtfString("roomName") : "Lobby_" + System.currentTimeMillis();
-        var roomPassword = params.containsKey("roomPassword") ? params.getUtfString("roomPassword") : "";
-        var maxUsers = params.containsKey("maxUsers") ? params.getShort("maxUsers") : 1;
+        var roomName = params.containsKey("roomName")
+                ? params.getUtfString("roomName")
+                : "Lobby_" + System.currentTimeMillis();
+
+        var roomPassword = params.containsKey("roomPassword")
+                ? params.getUtfString("roomPassword")
+                : "";
+
+        var maxUsers = params.containsKey("maxUsers")
+                ? params.getShort("maxUsers")
+                : 1;
 
         var roomSettings = new CreateRoomSettings();
         roomSettings.setName(roomName);
