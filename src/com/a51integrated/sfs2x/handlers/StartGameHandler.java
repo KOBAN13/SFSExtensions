@@ -21,7 +21,8 @@ public class StartGameHandler extends BaseClientRequestHandler
         final var lobbyRoom = sender.getLastJoinedRoom();
         final var result = new SFSObject();
 
-        if (!RoleService.isOwner(lobbyRoom, sender)) {
+        if (!RoleService.isOwner(lobbyRoom, sender))
+        {
             result.putUtfString(SFSResponseHelper.ERROR, "You are not the owner of the room");
             result.putBool(SFSResponseHelper.OK, false);
             send(SFSResponseHelper.ROOM_START_GAME, result, sender);

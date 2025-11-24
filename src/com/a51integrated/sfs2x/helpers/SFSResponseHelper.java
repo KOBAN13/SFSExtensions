@@ -21,5 +21,8 @@ public class SFSResponseHelper
     public static final String USER_JOIN_ROOM = "userJoinRoom";
     public static final String ROOM_USER_CONNECTED = "roomUserConnected";
     public static final String ROOM_START_GAME = "roomStartGame";
+
+    public static final String PLAYER_INPUT = "playerInput";
+    public static final String PLAYER_STATE = "playerState";
 }
 

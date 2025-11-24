@@ -11,8 +11,7 @@ import com.smartfoxserver.v2.extensions.SFSExtension;
 public class LobbyExtension extends SFSExtension
 {
     @Override
-    public void init()
-    {
+    public void init() {
         addRequestHandler(SFSResponseHelper.KICK_USER_IN_ROOM, KickPlayerHandler.class);
         addRequestHandler(SFSResponseHelper.UPDATE_LOBBY_DATA, UpdateLobbyHandler.class);
         addRequestHandler(SFSResponseHelper.ROOM_START_GAME, StartGameHandler.class);
@@ -21,8 +20,7 @@ public class LobbyExtension extends SFSExtension
     }
 
     @Override
-    public void destroy()
-    {
+    public void destroy() {
         super.destroy();
     }
 }
