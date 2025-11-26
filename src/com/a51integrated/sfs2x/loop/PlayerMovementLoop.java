@@ -26,8 +26,8 @@ public class PlayerMovementLoop implements Runnable
 
             var speed = playerState.isRunning ? 8f : 4f;
 
-            playerState.x += playerState.h * speed * 0.05f;
-            playerState.z += playerState.v * speed * 0.05f;
+            playerState.x += playerState.horizontal * speed * 0.05f;
+            playerState.z += playerState.vertical * speed * 0.05f;
 
             if (playerState.isJumping)
             {

@@ -8,7 +8,7 @@ import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
 
-public class RoomJoinServerEventHandler extends BaseServerEventHandler
+public class JoinLobbyRoomServerEventHandler extends BaseServerEventHandler
 {
     @Override
     public void handleServerEvent(ISFSEvent event)
