@@ -17,7 +17,7 @@ import koban.roomModule.RoleService;
 
 public class CreateLobbyHandler extends BaseClientRequestHandler
 {
-    private static final String GAME_ROOMS_GROUP_NAME = "Games";
+    private final String ROOM_GROUP_NAME = "Game";
 
     @Override
     public void handleClientRequest(User sender, ISFSObject params)
@@ -42,7 +42,8 @@ public class CreateLobbyHandler extends BaseClientRequestHandler
 
             sendSuccess(resultObject, room, sender);
 
-        } catch (SFSCreateRoomException | SFSJoinRoomException | SFSVariableException exception)
+        }
+        catch (SFSCreateRoomException | SFSJoinRoomException | SFSVariableException exception)
         {
             trace("Error creating or joining room", exception);
             sendError(resultObject, "Error creating or joining room", sender);
@@ -66,7 +67,7 @@ public class CreateLobbyHandler extends BaseClientRequestHandler
         var roomSettings = new CreateRoomSettings();
         roomSettings.setName(roomName);
         roomSettings.setMaxUsers(maxUsers);
-        roomSettings.setGroupId(GAME_ROOMS_GROUP_NAME);
+        roomSettings.setGroupId(ROOM_GROUP_NAME);
         roomSettings.setGame(false);
         roomSettings.setDynamic(true);
         roomSettings.setAutoRemoveMode(SFSRoomRemoveMode.WHEN_EMPTY_AND_CREATOR_IS_GONE);

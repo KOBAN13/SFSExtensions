@@ -1,6 +1,7 @@
 package com.a51integrated.sfs2x;
 
 import com.a51integrated.sfs2x.handlers.JoinGameRoomServerEventHandler;
+import com.a51integrated.sfs2x.handlers.JoinLobbyRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.PlayerInputHandler;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.loop.PlayerMovementLoop;

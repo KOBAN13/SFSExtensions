@@ -14,8 +14,8 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
     @Override
     public void handleServerEvent(ISFSEvent event) throws SFSException
     {
-        var user = (User)event.getParameter(SFSEventParam.USER);
-        var room = (Room)event.getParameter(SFSEventParam.ROOM);
+        var user = (User) event.getParameter(SFSEventParam.USER);
+        var room = (Room) event.getParameter(SFSEventParam.ROOM);
 
         var gameExtension = (GameExtension) getParentExtension();
 
@@ -26,11 +26,10 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
         playerState.x = (float) (Math.random() * 5f);
         playerState.y = 0f;
         playerState.z = (float) (Math.random() * 3f);
+        playerState.animationState = "idle";
 
         var result = roomState.toSFSObject();
 
-        trace("Good join game room room state");
-
-        gameExtension.send(SFSResponseHelper.PLAYER_JOIN_ROOM, result, room.getPlayersList());
+        send(SFSResponseHelper.PLAYER_JOIN_ROOM, result, room.getPlayersList());
     }
 }

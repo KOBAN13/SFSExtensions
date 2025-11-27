@@ -38,6 +38,6 @@ public class PlayerMovementLoop implements Runnable
 
         var packet = roomStateService.toSFSObject();
 
-        game.send(SFSResponseHelper.PLAYER_STATE, packet, room.getPlayersList(), true);
+        game.send(SFSResponseHelper.PLAYER_STATE, packet, room.getPlayersList());
     }
 }
