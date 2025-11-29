@@ -37,7 +37,7 @@ public class RoomStateService
         for (var playerState : players.values())
         {
             var item = new SFSObject();
-            item.putInt("id", playerState.id);
+            item.putInt("userId", playerState.id);
             item.putFloat("x", playerState.x);
             item.putFloat("y", playerState.y);
             item.putFloat("z", playerState.z);

@@ -29,7 +29,6 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
         playerState.animationState = "idle";
 
         var result = roomState.toSFSObject();
-
         send(SFSResponseHelper.PLAYER_JOIN_ROOM, result, room.getPlayersList());
     }
 }
