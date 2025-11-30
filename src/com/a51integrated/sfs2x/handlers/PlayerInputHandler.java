@@ -16,10 +16,7 @@ public class PlayerInputHandler extends BaseClientRequestHandler
         playerState.horizontal = data.getFloat("horizontal");
         playerState.vertical = data.getFloat("vertical");
         playerState.isRunning = data.getBool("isRunning");
-
-        if (data.getBool("isJumping"))
-        {
-            playerState.isJumping = true;
-        }
+        playerState.isOnGround = data.getBool("isOnGround");
+        playerState.isJumping = data.getBool("isJumping");
     }
 }

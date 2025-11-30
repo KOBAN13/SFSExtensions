@@ -10,6 +10,7 @@ import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
 import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
+import koban.roomModule.RoleService;
 
 public class CreateGameHandler extends BaseClientRequestHandler
 {
@@ -21,6 +22,14 @@ public class CreateGameHandler extends BaseClientRequestHandler
         final var lobbyRoom = sender.getLastJoinedRoom();
         final var users = lobbyRoom.getUserList();
         final var result = new SFSObject();
+
+        if (!RoleService.isOwner(lobbyRoom, sender))
+        {
+            result.putUtfString(SFSResponseHelper.ERROR, "You are not the owner of the room");
+            result.putBool(SFSResponseHelper.OK, false);
+            send(SFSResponseHelper.ROOM_START_GAME, result, sender);
+            return;
+        }
 
         try
         {

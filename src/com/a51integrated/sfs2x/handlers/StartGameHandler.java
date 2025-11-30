@@ -14,6 +14,7 @@ public class StartGameHandler extends BaseClientRequestHandler
     public void handleClientRequest(User sender, ISFSObject isfsObject)
     {
         final var lobbyRoom = sender.getLastJoinedRoom();
+        final var users = lobbyRoom.getUserList();
         final var result = new SFSObject();
 
         if (!RoleService.isOwner(lobbyRoom, sender))
@@ -36,10 +37,10 @@ public class StartGameHandler extends BaseClientRequestHandler
         catch (SFSVariableException e)
         {
             result.putBool(SFSResponseHelper.OK, false);
-            send(SFSResponseHelper.ROOM_START_GAME, result, sender);
+            send(SFSResponseHelper.ROOM_START_GAME, result, users);
         }
 
         result.putBool(SFSResponseHelper.OK, true);
-        send(SFSResponseHelper.ROOM_START_GAME, result, sender);
+        send(SFSResponseHelper.ROOM_START_GAME, result, users);
     }
 }

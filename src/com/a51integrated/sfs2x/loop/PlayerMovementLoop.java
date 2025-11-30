@@ -9,6 +9,10 @@ public class PlayerMovementLoop implements Runnable
     private final GameExtension game;
     private final RoomStateService roomStateService;
 
+    private static final float GRAVITY = -9.81f;
+    private static final float JUMP_VELOCITY = 0.5f;
+    private static final float DELTA_TIME = 0.5f;
+
     public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService)
     {
         this.game = game;
@@ -26,13 +30,24 @@ public class PlayerMovementLoop implements Runnable
 
             var speed = playerState.isRunning ? 8f : 4f;
 
-            playerState.x += playerState.horizontal * speed * 0.05f;
-            playerState.z += playerState.vertical * speed * 0.05f;
+            playerState.x += playerState.horizontal * speed * DELTA_TIME;
+            playerState.z += playerState.vertical * speed * DELTA_TIME;
 
-            if (playerState.isJumping)
+            if (playerState.isJumping && playerState.isOnGround)
             {
-                playerState.y += 0.3f;
+                playerState.verticalVelocity = JUMP_VELOCITY;
                 playerState.isJumping = false;
+                playerState.isOnGround = false;
+            }
+
+            playerState.verticalVelocity += GRAVITY * DELTA_TIME;
+            playerState.y += playerState.verticalVelocity * DELTA_TIME;
+
+            if (playerState.y <= 0f)
+            {
+                playerState.y = 0f;
+                playerState.verticalVelocity = 0f;
+                playerState.isOnGround = false;
             }
         }
 

@@ -6,8 +6,10 @@ public class PlayerState
 
     public float x, y, z;
     public float horizontal, vertical;
+    public float verticalVelocity;
     public boolean isJumping;
     public boolean isRunning;
+    public boolean isOnGround;
     public String animationState;
 
     public PlayerState(int id)
