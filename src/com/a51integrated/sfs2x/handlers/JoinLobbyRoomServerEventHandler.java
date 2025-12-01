@@ -16,8 +16,19 @@ public class JoinLobbyRoomServerEventHandler extends BaseServerEventHandler
         var room = (Room) event.getParameter(SFSEventParam.ROOM);
         var user = (User) event.getParameter(SFSEventParam.USER);
 
-        var isGameStarted = room.getVariable("gameStarted").getBoolValue();
+        var gameStartedVariable = room.getVariable("gameStarted");
         var result = new SFSObject();
+
+        if (gameStartedVariable == null)
+        {
+            result.putInt("roomId", room.getId());
+
+            send(SFSResponseHelper.ROOM_USER_CONNECTED, result, room.getUserList());
+
+            return;
+        }
+
+        var isGameStarted = gameStartedVariable.getBoolValue();
 
         if (isGameStarted)
         {

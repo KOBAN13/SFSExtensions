@@ -10,8 +10,8 @@ public class PlayerMovementLoop implements Runnable
     private final RoomStateService roomStateService;
 
     private static final float GRAVITY = -9.81f;
-    private static final float JUMP_VELOCITY = 0.5f;
-    private static final float DELTA_TIME = 0.5f;
+    private static final float JUMP_VELOCITY = 12f;
+    private static final float DELTA_TIME = 0.05f;
 
     public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService)
     {
@@ -33,6 +33,9 @@ public class PlayerMovementLoop implements Runnable
             playerState.x += playerState.horizontal * speed * DELTA_TIME;
             playerState.z += playerState.vertical * speed * DELTA_TIME;
 
+            game.trace("PlayerMovementLoop: playerState.x=" + playerState.x + ", playerState.z=" + playerState.z);
+            game.trace("Jump:" + playerState.isJumping + "IsOnGround:" + playerState.isOnGround);
+
             if (playerState.isJumping && playerState.isOnGround)
             {
                 playerState.verticalVelocity = JUMP_VELOCITY;
@@ -42,6 +45,8 @@ public class PlayerMovementLoop implements Runnable
 
             playerState.verticalVelocity += GRAVITY * DELTA_TIME;
             playerState.y += playerState.verticalVelocity * DELTA_TIME;
+
+            game.trace("VerticalVelocity:" + playerState.verticalVelocity + ", y:" + playerState.y);
 
             if (playerState.y <= 0f)
             {
