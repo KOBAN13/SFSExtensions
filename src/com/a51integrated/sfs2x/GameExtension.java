@@ -31,7 +31,7 @@ public class GameExtension extends SFSExtension
         gameLoop = sfs.getTaskScheduler().scheduleAtFixedRate(
                 new PlayerMovementLoop(this, roomStateService),
                 0,
-                50,
+                33,
                 TimeUnit.MILLISECONDS
         );
     }

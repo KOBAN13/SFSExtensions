@@ -10,8 +10,12 @@ public class PlayerMovementLoop implements Runnable
     private final RoomStateService roomStateService;
 
     private static final float GRAVITY = -9.81f;
-    private static final float JUMP_VELOCITY = 12f;
+    private static final float JUMP_VELOCITY = 8f;
+    private static final float MAX_JUMP_HEIGHT = 9f;
     private static final float DELTA_TIME = 0.05f;
+    private static final float THRESHOLD = 1.5f;
+
+    private long snapshotId = 0;
 
     public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService)
     {
@@ -24,17 +28,36 @@ public class PlayerMovementLoop implements Runnable
     {
         var room = roomStateService.getRoom();
 
+        snapshotId++;
+        var serverTime = snapshotId * DELTA_TIME;
+
         for (var user : room.getPlayersList())
         {
             var playerState = roomStateService.get(user);
 
+            playerState.serverTime = serverTime;
+            playerState.snapshotId = snapshotId;
+
             var speed = playerState.isRunning ? 8f : 4f;
+
+            var prevX = playerState.prevX;
+            var prevZ = playerState.prevZ;
 
             playerState.x += playerState.horizontal * speed * DELTA_TIME;
             playerState.z += playerState.vertical * speed * DELTA_TIME;
 
-            game.trace("PlayerMovementLoop: playerState.x=" + playerState.x + ", playerState.z=" + playerState.z);
-            game.trace("Jump:" + playerState.isJumping + "IsOnGround:" + playerState.isOnGround);
+            var currentX = playerState.x;
+            var currentZ = playerState.z;
+
+            var distance = Math.sqrt(Math.pow(currentX - prevX, 2) + Math.pow(currentZ - prevZ, 2));
+
+            game.trace("PlayerMovementLoop: x=" + currentX + ", z=" + currentZ + ", distance=" + distance);
+
+            if (distance > THRESHOLD)
+            {
+                playerState.x = prevX;
+                playerState.z = prevZ;
+            }
 
             if (playerState.isJumping && playerState.isOnGround)
             {
@@ -42,17 +65,25 @@ public class PlayerMovementLoop implements Runnable
                 playerState.isJumping = false;
                 playerState.isOnGround = false;
             }
+            else if (playerState.isJumping && !playerState.isOnGround)
+            {
+                playerState.isJumping = false;
+            }
 
             playerState.verticalVelocity += GRAVITY * DELTA_TIME;
             playerState.y += playerState.verticalVelocity * DELTA_TIME;
-
-            game.trace("VerticalVelocity:" + playerState.verticalVelocity + ", y:" + playerState.y);
 
             if (playerState.y <= 0f)
             {
                 playerState.y = 0f;
                 playerState.verticalVelocity = 0f;
-                playerState.isOnGround = false;
+                playerState.isOnGround = true;
+            }
+
+            if (playerState.y > MAX_JUMP_HEIGHT)
+            {
+                playerState.y  = MAX_JUMP_HEIGHT;
+                playerState.verticalVelocity = 0f;
             }
         }
 

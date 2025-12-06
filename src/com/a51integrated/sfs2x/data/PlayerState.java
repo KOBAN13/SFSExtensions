@@ -4,7 +4,10 @@ public class PlayerState
 {
     public final int id;
 
+    public long snapshotId;
+    public float serverTime;
     public float x, y, z;
+    public float prevX, prevY, prevZ;
     public float horizontal, vertical;
     public float verticalVelocity;
     public boolean isJumping;
