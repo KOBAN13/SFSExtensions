@@ -51,12 +51,15 @@ public class PlayerMovementLoop implements Runnable
 
             var distance = Math.sqrt(Math.pow(currentX - prevX, 2) + Math.pow(currentZ - prevZ, 2));
 
-            game.trace("PlayerMovementLoop: x=" + currentX + ", z=" + currentZ + ", distance=" + distance);
-
             if (distance > THRESHOLD)
             {
                 playerState.x = prevX;
                 playerState.z = prevZ;
+            }
+            else
+            {
+                playerState.prevX = currentX;
+                playerState.prevZ = currentZ;
             }
 
             if (playerState.isJumping && playerState.isOnGround)

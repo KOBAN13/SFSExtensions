@@ -10,7 +10,7 @@ import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import koban.roomModule.ERoomRole;
 import koban.roomModule.RoleService;
 
-public class JoinRoomHandler extends BaseClientRequestHandler
+public class JoinLobbyRoomHandler extends BaseClientRequestHandler
 {
     @Override
     public void handleClientRequest(User sender, ISFSObject params)

@@ -41,6 +41,8 @@ public class RoomStateService
             item.putFloat("x", playerState.x);
             item.putFloat("y", playerState.y);
             item.putFloat("z", playerState.z);
+            item.putFloat("xRotationDirection", playerState.xRotation);
+            item.putFloat("zRotationDirection", playerState.zRotation);
             item.putLong("snapshot", playerState.snapshotId);
             item.putFloat("serverTime", playerState.serverTime);
             item.putFloat("verticalVelocity", playerState.verticalVelocity);
