@@ -16,7 +16,7 @@ import koban.roomModule.RoleService;
 
 import java.util.List;
 
-public class CreateGameHandler extends BaseClientRequestHandler
+public class CreateGameRoomHandler extends BaseClientRequestHandler
 {
     private final String ROOM_GROUP_NAME = "Game";
 
@@ -39,7 +39,12 @@ public class CreateGameHandler extends BaseClientRequestHandler
 
     private void JoinToGameRoom(User sender, Room lobbyRoom, ISFSObject result)
     {
-        var gameRoomId = lobbyRoom.getVariable("gameRoomId").getIntValue();
+        var gameRoomVariable = lobbyRoom.getVariable("gameRoomId");
+
+        if (gameRoomVariable == null)
+            return;
+
+        var gameRoomId = gameRoomVariable.getIntValue();
 
         var gameRoom = getParentExtension().getParentZone().getRoomById(gameRoomId);
 
@@ -119,7 +124,8 @@ public class CreateGameHandler extends BaseClientRequestHandler
 
         var lobbyPassword = lobbyRoom.getPassword();
 
-        if (!lobbyPassword.isEmpty()) {
+        if (lobbyPassword != null && !lobbyPassword.isEmpty())
+        {
             settings.setPassword(lobbyPassword);
         }
 

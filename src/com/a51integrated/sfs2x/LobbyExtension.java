@@ -12,7 +12,7 @@ public class LobbyExtension extends SFSExtension
         addRequestHandler(SFSResponseHelper.KICK_USER_IN_ROOM, KickPlayerHandler.class);
         addRequestHandler(SFSResponseHelper.UPDATE_LOBBY_DATA, UpdateLobbyHandler.class);
         addRequestHandler(SFSResponseHelper.ROOM_START_GAME, StartGameHandler.class);
-        addRequestHandler(SFSResponseHelper.CREATE_GAME_ROOM, CreateGameHandler.class);
+        addRequestHandler(SFSResponseHelper.CREATE_GAME_ROOM, CreateGameRoomHandler.class);
 
         addEventHandler(SFSEventType.USER_JOIN_ROOM, JoinLobbyRoomServerEventHandler.class);
     }
