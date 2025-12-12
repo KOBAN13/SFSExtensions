@@ -19,7 +19,7 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
 
         var gameExtension = (GameExtension) getParentExtension();
 
-        var roomState = gameExtension.roomStateService;
+        var roomState = gameExtension.getRoomStateService();
 
         var playerState = roomState.get(user);
 

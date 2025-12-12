@@ -2,12 +2,14 @@ package com.a51integrated.sfs2x.loop;
 
 import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.services.CollisionMapService;
 import com.a51integrated.sfs2x.services.RoomStateService;
 
 public class PlayerMovementLoop implements Runnable
 {
     private final GameExtension game;
     private final RoomStateService roomStateService;
+    private final CollisionMapService collisionMapService;
 
     private static final float GRAVITY = -9.81f;
     private static final float JUMP_VELOCITY = 8f;
@@ -17,10 +19,11 @@ public class PlayerMovementLoop implements Runnable
 
     private long snapshotId = 0;
 
-    public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService)
+    public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService, CollisionMapService collisionMapService)
     {
         this.game = game;
         this.roomStateService = roomStateService;
+        this.collisionMapService = collisionMapService;
     }
 
     @Override
@@ -42,12 +45,23 @@ public class PlayerMovementLoop implements Runnable
 
             var prevX = playerState.prevX;
             var prevZ = playerState.prevZ;
+            var prevY = playerState.y;
 
-            playerState.x += playerState.horizontal * speed * DELTA_TIME;
-            playerState.z += playerState.vertical * speed * DELTA_TIME;
+            var currentX = prevX + playerState.horizontal * speed * DELTA_TIME;
+            var currentZ = prevZ + playerState.vertical * speed * DELTA_TIME;
+            var currentY = playerState.y;
 
-            var currentX = playerState.x;
-            var currentZ = playerState.z;
+            var isColliding = collisionMapService.isColliding(currentX, currentZ, currentY);
+
+            if (isColliding)
+            {
+                playerState.x = prevX;
+                playerState.z = prevZ;
+                return;
+            }
+
+            playerState.x = currentX;
+            playerState.z = currentZ;
 
             var distance = Math.sqrt(Math.pow(currentX - prevX, 2) + Math.pow(currentZ - prevZ, 2));
 

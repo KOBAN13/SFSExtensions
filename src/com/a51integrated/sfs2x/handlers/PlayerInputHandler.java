@@ -10,7 +10,7 @@ public class PlayerInputHandler extends BaseClientRequestHandler
     @Override
     public void handleClientRequest(User sender, ISFSObject data)
     {
-        var roomState = ((GameExtension)getParentExtension()).roomStateService;
+        var roomState = ((GameExtension)getParentExtension()).getRoomStateService();
         var playerState = roomState.get(sender);
 
         playerState.horizontal = data.getFloat("horizontal");
