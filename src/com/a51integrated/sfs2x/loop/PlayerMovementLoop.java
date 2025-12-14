@@ -53,9 +53,6 @@ public class PlayerMovementLoop implements Runnable
 
             var isColliding = collisionMapService.isColliding(currentX, currentZ, currentY);
 
-            game.trace("isColliding " + isColliding);
-            game.trace("currentX: " + currentX + " currentZ: " + currentZ + " currentY: " + currentY);
-
             if (isColliding)
             {
                 playerState.x = prevX;

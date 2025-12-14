@@ -25,6 +25,8 @@ public class CollisionMapService
         assert collisionMapPayload != null;
 
         shapes.addAll(collisionMapPayload.Shapes);
+
+        gameExtension.trace("Collision map loaded from " + path + " with " + shapes.size() + " shapes");
     }
 
     public void clear()
@@ -40,13 +42,19 @@ public class CollisionMapService
 
         for (var shape : shapes)
         {
-            if (shape.LayerCategory != ECollisionCategory.Obstacle)
-                continue;
+            gameExtension.trace("Testing against shape type:" + shape.Type + " pos:" +
+                    shape.Position.x + "," + shape.Position.y + "," + shape.Position.z +
+                    " scale:" + shape.Scale.x + "," + shape.Scale.y + "," + shape.Scale.z);
 
             if (intersectsShape(shape, px, py, pz, playerRadius, playerHeight))
+            {
+                gameExtension.trace("Collision detected with shape type:" + shape.Type);
                 return true;
-        }
+            }
 
+            gameExtension.trace("Collision name not detected " + shape.Name);
+        }
+        gameExtension.trace("No collision detected for position x:" + px + " y:" + py + " z:" + pz);
         return false;
     }
 
@@ -83,13 +91,23 @@ public class CollisionMapService
         var dz = pz - sz;
 
         var rSum = radius + sphereRadius;
-        return (dx*dx + dy*dy + dz*dz) <= (rSum * rSum);
+        var collides = (dx*dx + dy*dy + dz*dz) <= (rSum * rSum);
+
+        gameExtension.trace("Sphere collision check -> center:" + sx + "," + sy + "," + sz +
+                " radius:" + sphereRadius + " result:" + collides);
+
+        return collides;
     }
 
     private boolean collisionCapsuleWithBox(CollisionShapeData shape, float px, float py, float pz, float radius, float height)
     {
         var boxAABB = buildAABBFromBox(shape);
-        return boxAABB.intersectsCapsule(px, py, pz, radius, height);
+        var collides = boxAABB.intersectsCapsule(px, py, pz, radius, height);
+
+        gameExtension.trace("Box collision check -> min:" + boxAABB.minX + "," + boxAABB.minY + "," + boxAABB.minZ +
+                " max:" + boxAABB.maxX + "," + boxAABB.maxY + "," + boxAABB.maxZ + " result:" + collides);
+
+        return collides;
     }
 
     private boolean collisionCapsuleWithCapsule(CollisionShapeData shape, float px, float py, float pz, float radius, float height)
@@ -134,7 +152,7 @@ public class CollisionMapService
         var minZ = cz - hz;
         var maxZ = cz + hz;
 
-        return new AABBService(minX, minY, minZ, maxX, maxY, maxZ);
+        return new AABBService(gameExtension, minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     private float clamp(float v, float min, float max)
@@ -154,6 +172,8 @@ public class CollisionMapService
             for (var shape : collisionMapPayload.Shapes)
             {
                 shape.LayerCategory = layerCategoryMapService.getCategory(shape.LayerName);
+
+                gameExtension.trace("Testing against shape name " + shape.Name + " pos: " + shape.Position.x + ", " + shape.Position.y + ", " + shape.Position.z);
             }
 
             return collisionMapPayload;

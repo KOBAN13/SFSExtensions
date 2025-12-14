@@ -1,11 +1,15 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
+
 public class AABBService
 {
     public float minX, minY, minZ;
     public float maxX, maxY, maxZ;
 
-    public AABBService(float MinX, float MinY, float MinZ, float MaxX, float MaxY, float MaxZ)
+    private GameExtension gameExtension;
+
+    public AABBService(GameExtension gameExtension, float MinX, float MinY, float MinZ, float MaxX, float MaxY, float MaxZ)
     {
         minX = MinX;
         minY = MinY;
@@ -13,6 +17,8 @@ public class AABBService
         maxX = MaxX;
         maxY = MaxY;
         maxZ = MaxZ;
+
+        this.gameExtension = gameExtension;
     }
 
     public boolean intersectsCapsule(float px, float py, float pz, float radius, float height)
@@ -20,8 +26,10 @@ public class AABBService
         var capsuleBottom = py;
         var capsuleTop = py + height;
 
-        if (capsuleTop < minX || capsuleBottom > maxX)
+        if (capsuleTop < minY || capsuleBottom > maxY)
         {
+            gameExtension.trace("AABB collision skipped: capsule outside vertical bounds minY:" + minY + " maxY:" + maxY +
+                    " bottom:" + capsuleBottom + " top:" + capsuleTop);
             return false;
         }
 
@@ -31,7 +39,16 @@ public class AABBService
         var dx = px - closestX;
         var dz = pz - closestZ;
 
-        return (dx * dx + dz * dz) <= (radius * height);
+        var collides = (dx * dx + dz * dz) <= (radius * height);
+
+        gameExtension.trace("AABB collision check -> capsulePos:" + px + "," + py + "," + pz +
+                " radius:" + radius + " height:" + height +
+                " clampX:" + closestX + " clampZ:" + closestZ +
+                " bounds min:" + minX + "," + minY + "," + minZ +
+                " max:" + maxX + "," + maxY + "," + maxZ +
+                " result:" + collides);
+
+        return collides;
     }
 
     private static float clamp(float v, float min, float max)
