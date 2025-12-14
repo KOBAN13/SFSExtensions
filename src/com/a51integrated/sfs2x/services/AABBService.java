@@ -26,7 +26,7 @@ public class AABBService
         var capsuleBottom = py;
         var capsuleTop = py + height;
 
-        if (capsuleTop < minY || capsuleBottom > maxY)
+        if (capsuleTop + radius < minY || capsuleBottom - radius > maxY)
         {
             gameExtension.trace("AABB collision skipped: capsule outside vertical bounds minY:" + minY + " maxY:" + maxY +
                     " bottom:" + capsuleBottom + " top:" + capsuleTop);
@@ -39,7 +39,9 @@ public class AABBService
         var dx = px - closestX;
         var dz = pz - closestZ;
 
-        var collides = (dx * dx + dz * dz) <= (radius * height);
+        gameExtension.trace("Squart: ", (dx * dx + dz * dz) + " and " + (radius * radius));
+
+        var collides = (dx * dx + dz * dz) <= (radius * radius);
 
         gameExtension.trace("AABB collision check -> capsulePos:" + px + "," + py + "," + pz +
                 " radius:" + radius + " height:" + height +

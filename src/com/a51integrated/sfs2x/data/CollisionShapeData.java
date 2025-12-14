@@ -8,7 +8,6 @@ public class CollisionShapeData
     public int Layer;
     public String LayerName;
     public ECollisionCategory LayerCategory = ECollisionCategory.Default;
-    public Vector3 Position;
     public Quaternion Rotation;
     public Vector3 Scale;
 

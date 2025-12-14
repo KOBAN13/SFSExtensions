@@ -41,19 +41,23 @@ public class CollisionMapService
 
         for (var shape : shapes)
         {
-            gameExtension.trace("Testing against shape type:" + shape.Type + " pos:" +
-                    shape.Position.x + "," + shape.Position.y + "," + shape.Position.z +
-                    " scale:" + shape.Scale.x + "," + shape.Scale.y + "," + shape.Scale.z);
+            if (!shape.Name.contains("Cube (7)"))
+                continue;
+
+            gameExtension.trace("Testing against shape type:" + shape.Type + " and name: " + shape.Name);
 
             if (intersectsShape(shape, px, py, pz, playerRadius, playerHeight))
             {
-                gameExtension.trace("Collision detected with shape type:" + shape.Type);
+                //gameExtension.trace("Collision detected with shape type:" + shape.Type);
                 return true;
             }
 
-            gameExtension.trace("Collision name not detected " + shape.Name);
+            gameExtension.trace("Testing against shape type:" + shape.Type + " and name: " + shape.Name);
+
+            //gameExtension.trace("Collision name not detected " + shape.Name);
         }
-        gameExtension.trace("No collision detected for position x:" + px + " y:" + py + " z:" + pz);
+
+        //gameExtension.trace("No collision detected for position x:" + px + " y:" + py + " z:" + pz);
         return false;
     }
 
@@ -74,9 +78,9 @@ public class CollisionMapService
 
     private boolean collisionCapsuleWithSphere(CollisionShapeData shape, float px, float py, float pz, float radius, float height)
     {
-        var sx = shape.Position.x + shape.Center.x * shape.Scale.x;
-        var sy = shape.Position.y + shape.Center.y * shape.Scale.y;
-        var sz = shape.Position.z + shape.Center.z * shape.Scale.z;
+        var sx = shape.Center.x * shape.Scale.x;
+        var sy = shape.Center.y * shape.Scale.y;
+        var sz = shape.Center.z * shape.Scale.z;
 
         var sphereRadius = shape.Radius * shape.Scale.x;
 
@@ -111,9 +115,9 @@ public class CollisionMapService
 
     private boolean collisionCapsuleWithCapsule(CollisionShapeData shape, float px, float py, float pz, float radius, float height)
     {
-        var cx = shape.Position.x + shape.Center.x * shape.Scale.x;
-        var cy = shape.Position.y + shape.Center.y * shape.Scale.y;
-        var cz = shape.Position.z + shape.Center.z * shape.Scale.z;
+        var cx = shape.Center.x * shape.Scale.x;
+        var cy = shape.Center.y * shape.Scale.y;
+        var cz = shape.Center.z * shape.Scale.z;
 
         var envRadius = shape.Radius * shape.Scale.x;
         var envHeight = shape.Height * shape.Scale.y;
@@ -124,7 +128,7 @@ public class CollisionMapService
         var bBottom = cy;
         var bTop = cy + envHeight;
 
-        if (aTop < bBottom || aBottom > bTop)
+        if (aTop + radius < bBottom - envRadius || aBottom - radius > bTop + envRadius)
             return false;
 
         var dx = px - cx;
@@ -140,9 +144,13 @@ public class CollisionMapService
         var hy = shape.Size.y * shape.Scale.y * 0.5f;
         var hz = shape.Size.z * shape.Scale.z * 0.5f;
 
-        var cx = shape.Position.x + shape.Center.x * shape.Scale.x;
-        var cy = shape.Position.y + shape.Center.y * shape.Scale.y;
-        var cz = shape.Position.z + shape.Center.z * shape.Scale.z;
+        gameExtension.trace(" hx: " + hx + " hy: " + hy + " hz: " + hz);
+
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
+
+        gameExtension.trace(" cx: " + cx + " hy: " + hy + " cz: " + cz);
 
         var minX = cx - hx;
         var maxX = cx + hx;
@@ -151,8 +159,11 @@ public class CollisionMapService
         var minZ = cz - hz;
         var maxZ = cz + hz;
 
+        gameExtension.trace("minX: " + minX + " maxX: " + maxX  + " minY: " + minY + " maxY: " + maxY + " minZ: " + minZ + " maxZ: " + maxZ) ;
+
         return new AABBService(gameExtension, minX, minY, minZ, maxX, maxY, maxZ);
     }
+
 
     private float clamp(float v, float min, float max)
     {
@@ -172,7 +183,7 @@ public class CollisionMapService
             {
                 shape.LayerCategory = layerCategoryMapService.getCategory(shape.LayerName);
 
-                gameExtension.trace("Testing against shape name " + shape.Name + " pos: " + shape.Position.x + ", " + shape.Position.y + ", " + shape.Position.z);
+                gameExtension.trace("Testing against shape name " + shape.Name);
             }
 
             return collisionMapPayload;

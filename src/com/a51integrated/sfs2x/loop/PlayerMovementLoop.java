@@ -14,8 +14,18 @@ public class PlayerMovementLoop implements Runnable
     private static final float GRAVITY = -9.81f;
     private static final float JUMP_VELOCITY = 8f;
     private static final float MAX_JUMP_HEIGHT = 9f;
+
+    // 20 тиков/сек
     private static final float DELTA_TIME = 0.05f;
+
+    // Макс. допустимый шаг по XZ за тик (античит/антиспайк)
     private static final float THRESHOLD = 1.5f;
+    private static final float THRESHOLD_SQR = THRESHOLD * THRESHOLD;
+
+    // Параметры капсулы игрока для серверной коллизии
+    // (желательно брать из конфига/room settings)
+    private static final float PLAYER_RADIUS = 0.4f;
+    private static final float PLAYER_HEIGHT = 1.8f;
 
     private long snapshotId = 0;
 
@@ -32,7 +42,7 @@ public class PlayerMovementLoop implements Runnable
         var room = roomStateService.getRoom();
 
         snapshotId++;
-        var serverTime = snapshotId * DELTA_TIME;
+        float serverTime = snapshotId * DELTA_TIME;
 
         for (var user : room.getPlayersList())
         {
@@ -43,52 +53,52 @@ public class PlayerMovementLoop implements Runnable
 
             var speed = playerState.isRunning ? 8f : 4f;
 
-            var prevX = playerState.prevX;
-            var prevZ = playerState.prevZ;
-            var prevY = playerState.y;
+            var baseX = playerState.x;
+            var baseY = playerState.y;
+            var baseZ = playerState.z;
 
-            var currentX = prevX + playerState.horizontal * speed * DELTA_TIME;
-            var currentZ = prevZ + playerState.vertical * speed * DELTA_TIME;
-            var currentY = playerState.y;
+            playerState.prevX = baseX;
+            playerState.prevZ = baseZ;
 
-            var isColliding = collisionMapService.isColliding(currentX, currentY, currentZ);
+            var dx = playerState.horizontal * speed * DELTA_TIME;
+            var dz = playerState.vertical   * speed * DELTA_TIME;
 
-            if (isColliding)
+            var stepSqr = dx * dx + dz * dz;
+
+            if (stepSqr > THRESHOLD_SQR)
             {
-                playerState.x = prevX;
-                playerState.z = prevZ;
-                return;
+                continue;
             }
 
-            playerState.x = currentX;
-            playerState.z = currentZ;
+            var targetX = baseX + dx;
+            var targetZ = baseZ + dz;
 
-            var distance = Math.sqrt(Math.pow(currentX - prevX, 2) + Math.pow(currentZ - prevZ, 2));
+            var isColliding = collisionMapService.isColliding(targetX, baseY, targetZ);
 
-            if (distance > THRESHOLD)
+            if (!isColliding)
             {
-                playerState.x = prevX;
-                playerState.z = prevZ;
-            }
-            else
-            {
-                playerState.prevX = currentX;
-                playerState.prevZ = currentZ;
+                playerState.x = targetX;
+                playerState.z = targetZ;
             }
 
-            if (playerState.isJumping && playerState.isOnGround)
+            if (playerState.isJumping)
             {
-                playerState.verticalVelocity = JUMP_VELOCITY;
-                playerState.isJumping = false;
-                playerState.isOnGround = false;
-            }
-            else if (playerState.isJumping && !playerState.isOnGround)
-            {
+                if (playerState.isOnGround)
+                {
+                    playerState.verticalVelocity = JUMP_VELOCITY;
+                    playerState.isOnGround = false;
+                }
                 playerState.isJumping = false;
             }
 
             playerState.verticalVelocity += GRAVITY * DELTA_TIME;
             playerState.y += playerState.verticalVelocity * DELTA_TIME;
+
+            if (playerState.y > MAX_JUMP_HEIGHT)
+            {
+                playerState.y = MAX_JUMP_HEIGHT;
+                playerState.verticalVelocity = 0f;
+            }
 
             if (playerState.y <= 0f)
             {
@@ -96,16 +106,13 @@ public class PlayerMovementLoop implements Runnable
                 playerState.verticalVelocity = 0f;
                 playerState.isOnGround = true;
             }
-
-            if (playerState.y > MAX_JUMP_HEIGHT)
+            else
             {
-                playerState.y  = MAX_JUMP_HEIGHT;
-                playerState.verticalVelocity = 0f;
+                playerState.isOnGround = false;
             }
         }
 
         var packet = roomStateService.toSFSObject();
-
         game.send(SFSResponseHelper.PLAYER_STATE, packet, room.getPlayersList());
     }
 }
