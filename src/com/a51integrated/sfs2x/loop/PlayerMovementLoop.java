@@ -51,7 +51,7 @@ public class PlayerMovementLoop implements Runnable
             var currentZ = prevZ + playerState.vertical * speed * DELTA_TIME;
             var currentY = playerState.y;
 
-            var isColliding = collisionMapService.isColliding(currentX, currentZ, currentY);
+            var isColliding = collisionMapService.isColliding(currentX, currentY, currentZ);
 
             if (isColliding)
             {
