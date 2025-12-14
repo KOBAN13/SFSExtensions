@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,9 +13,11 @@ import java.util.List;
 public class CollisionMapService
 {
     private final List<CollisionShapeData> shapes = new ArrayList<>();
+    private final GameExtension gameExtension;
 
-    public CollisionMapService(String path)
+    public CollisionMapService(String path, GameExtension gameExtension)
     {
+        this.gameExtension = gameExtension;
         var collisionMapPayload = DeserializeCollisionMap(path);
 
         assert collisionMapPayload != null;
@@ -117,7 +120,7 @@ public class CollisionMapService
 
         var cx = shape.Position.x + shape.Center.x * shape.Scale.x;
         var cy = shape.Position.y + shape.Center.y * shape.Scale.y;
-        var cz = shape.Position.x + shape.Size.x * shape.Scale.x;
+        var cz = shape.Position.z + shape.Center.z * shape.Scale.z;
 
         var minX = cx - hx;
         var maxX = cx + hx;

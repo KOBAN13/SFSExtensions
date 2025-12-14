@@ -31,7 +31,7 @@ public class AABBService
         var dx = px - closestX;
         var dz = pz - closestZ;
 
-        return (dx * dx + dz * dz) < (radius * height);
+        return (dx * dx + dz * dz) <= (radius * height);
     }
 
     private static float clamp(float v, float min, float max)
