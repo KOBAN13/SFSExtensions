@@ -3,6 +3,7 @@ package com.a51integrated.sfs2x.services;
 import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
+import com.a51integrated.sfs2x.data.ECollisionCategory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -14,6 +15,7 @@ public class CollisionMapService
 {
     private final List<CollisionShapeData> shapes = new ArrayList<>();
     private final GameExtension gameExtension;
+    private final LayerCategoryMapService layerCategoryMapService = new LayerCategoryMapService();
 
     public CollisionMapService(String path, GameExtension gameExtension)
     {
@@ -32,11 +34,14 @@ public class CollisionMapService
 
     public boolean isColliding(float px, float py, float pz)
     {
+        //TODO: SDK Parameters
+        var playerRadius = 0.5f;
+        var playerHeight = 2f;
+
         for (var shape : shapes)
         {
-            //TODO: SDK Parameters
-            float playerRadius = 0.5f;
-            float playerHeight = 2f;
+            if (shape.LayerCategory != ECollisionCategory.Obstacle)
+                continue;
 
             if (intersectsShape(shape, px, py, pz, playerRadius, playerHeight))
                 return true;
@@ -73,11 +78,11 @@ public class CollisionMapService
 
         var closetY = clamp(sy, capsuleBottomY, capsuleTopY);
 
-        float dx = px - sx;
-        float dy = closetY - sy;
-        float dz = pz - sz;
+        var dx = px - sx;
+        var dy = closetY - sy;
+        var dz = pz - sz;
 
-        float rSum = radius + sphereRadius;
+        var rSum = radius + sphereRadius;
         return (dx*dx + dy*dy + dz*dz) <= (rSum * rSum);
     }
 
@@ -144,7 +149,14 @@ public class CollisionMapService
 
         try
         {
-            return mapper.readValue(file, CollisionMapPayload.class);
+            var collisionMapPayload = mapper.readValue(file, CollisionMapPayload.class);
+
+            for (var shape : collisionMapPayload.Shapes)
+            {
+                shape.LayerCategory = layerCategoryMapService.getCategory(shape.LayerName);
+            }
+
+            return collisionMapPayload;
         }
         catch (IOException exception)
         {
