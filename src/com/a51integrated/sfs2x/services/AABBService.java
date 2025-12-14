@@ -20,8 +20,10 @@ public class AABBService
         var capsuleBottom = py;
         var capsuleTop = py + height;
 
-        if (capsuleTop < minX || capsuleBottom > maxX)
+        if (capsuleTop < minY || capsuleBottom > maxY)
         {
+            System.out.println("AABB collision skipped: capsule outside vertical bounds minY:" + minY + " maxY:" + maxY +
+                    " bottom:" + capsuleBottom + " top:" + capsuleTop);
             return false;
         }
 
@@ -31,7 +33,16 @@ public class AABBService
         var dx = px - closestX;
         var dz = pz - closestZ;
 
-        return (dx * dx + dz * dz) <= (radius * height);
+        var collides = (dx * dx + dz * dz) <= (radius * height);
+
+        System.out.println("AABB collision check -> capsulePos:" + px + "," + py + "," + pz +
+                " radius:" + radius + " height:" + height +
+                " clampX:" + closestX + " clampZ:" + closestZ +
+                " bounds min:" + minX + "," + minY + "," + minZ +
+                " max:" + maxX + "," + maxY + "," + maxZ +
+                " result:" + collides);
+
+        return collides;
     }
 
     private static float clamp(float v, float min, float max)
