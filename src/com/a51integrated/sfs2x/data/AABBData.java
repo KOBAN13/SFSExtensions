@@ -5,7 +5,7 @@ public final class AABBData
     public float minX, minY, minZ;
     public float maxX, maxY, maxZ;
 
-    public AABBData setCenterHalfExtents(float cx, float cy, float cz, float hx, float hy, float hz)
+    public void setCenterHalfExtents(float cx, float cy, float cz, float hx, float hy, float hz)
     {
         minX = cx - hx;
         maxX = cx + hx;
@@ -13,7 +13,5 @@ public final class AABBData
         maxY = cy + hy;
         minZ = cz - hz;
         maxZ = cz + hz;
-
-        return this;
     }
 }

@@ -20,7 +20,7 @@ public class LayerCategoryMapService
         categoryMap.put("Obstacle", ECollisionCategory.Obstacle);
     }
 
-    public ECollisionCategory  getCategory(String category)
+    public ECollisionCategory getCategory(String category)
     {
         return categoryMap.get(category);
     }
