@@ -39,6 +39,7 @@ public class CollisionMapService
     {
         playerCollider.set(px, py, pz, playerRadius, playerHeight);
 
+        //TODO: Оптимизировать нет смылса проверять коллизию с каждым обьектом на сцене
         for (var shape : shapes)
         {
             if (intersectsShape(shape))

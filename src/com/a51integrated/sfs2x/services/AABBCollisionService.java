@@ -14,7 +14,11 @@ public class AABBCollisionService
         var hy = halfScaled(shape.Size.y, shape.Scale.y);
         var hz = halfScaled(shape.Size.z, shape.Scale.z);
 
-        aabbData.setCenterHalfExtents(shape.Center.x, shape.Center.y, shape.Center.z, hx, hy, hz);
+        var cx = shape.Size.x * shape.Scale.x;
+        var cy = shape.Size.y * shape.Scale.y;
+        var cz = shape.Size.z * shape.Scale.z;
+
+        aabbData.setCenterHalfExtents(cx, cy, cz, hx, hy, hz);
 
         return intersectsCapsuleAabbXZ(player);
     }
@@ -92,12 +96,13 @@ public class AABBCollisionService
         return value * scale * 0.5f;
     }
 
-    private static float sqr(float v)
+    private static float sqr(float value)
     {
-        return v * v;
+        return value * value;
     }
 
-    private static float clamp(float v, float min, float max) {
+    private static float clamp(float v, float min, float max)
+    {
         return Math.max(min, Math.min(max, v));
     }
 }

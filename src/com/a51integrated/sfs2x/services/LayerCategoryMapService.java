@@ -20,6 +20,14 @@ public class LayerCategoryMapService
         categoryMap.put("Obstacle", ECollisionCategory.Obstacle);
     }
 
+    public boolean layerInMask(int unityLayer, int layerMask)
+    {
+        if (unityLayer < 0 || unityLayer > 31)
+            return false;
+
+        return (layerMask & (1 << unityLayer)) != 0;
+    }
+
     public ECollisionCategory getCategory(String category)
     {
         return categoryMap.get(category);
