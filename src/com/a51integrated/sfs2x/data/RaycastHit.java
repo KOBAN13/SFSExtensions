@@ -7,14 +7,12 @@ public final class RaycastHit
     private boolean hit;
     private float distance;
     private Vector3f point;
-    private Vector3f direction;
 
     public void clear()
     {
         hit = false;
         distance = 0;
         point = point.zero();
-        direction = direction.zero();
     }
 
     public void setHit(boolean hit)
@@ -35,11 +33,6 @@ public final class RaycastHit
         this.point = point;
     }
 
-    public void setDirection(Vector3f direction)
-    {
-        this.direction = direction;
-    }
-
     public boolean getHit()
     {
         return hit;
@@ -53,10 +46,5 @@ public final class RaycastHit
     public Vector3f getPoint()
     {
         return point;
-    }
-
-    public Vector3f getDirection()
-    {
-        return direction;
     }
 }

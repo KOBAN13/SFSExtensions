@@ -25,5 +25,7 @@ public class SFSResponseHelper
     public static final String PLAYER_JOIN_ROOM = "playerJoinRoom";
     public static final String PLAYER_INPUT = "playerInput";
     public static final String PLAYER_STATE = "playerState";
+
+    public static final String RAYCAST = "raycast";
 }
 

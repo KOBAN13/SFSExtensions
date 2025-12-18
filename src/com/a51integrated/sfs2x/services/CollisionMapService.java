@@ -16,6 +16,7 @@ public class CollisionMapService
     private final LayerCategoryMapService layerCategoryMapService = new LayerCategoryMapService();
     private final AABBCollisionService aabbService = new AABBCollisionService();
     private final PlayerCollider playerCollider = new PlayerCollider();
+    private final RaycastService raycastService;
 
     //TODO: SDK Parameters
     private float playerRadius = 0.6f;
@@ -28,11 +29,18 @@ public class CollisionMapService
         assert collisionMapPayload != null;
 
         shapes.addAll(collisionMapPayload.Shapes);
+
+        raycastService = new RaycastService(shapes, layerCategoryMapService);
     }
 
     public void clear()
     {
         shapes.clear();
+    }
+
+    public RaycastService getRaycastService()
+    {
+        return raycastService;
     }
 
     public boolean isColliding(float px, float py, float pz)

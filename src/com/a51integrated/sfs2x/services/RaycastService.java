@@ -7,21 +7,18 @@ import java.util.List;
 
 public class RaycastService
 {
-    private final List<CollisionShapeData> collisionMapPayloads;
+    private final List<CollisionShapeData> shapes;
     private final LayerCategoryMapService layerCategoryMapService;
 
-    private RaycastShapeData raycastShapeData;
+    private RaycastShapeData raycastShapeData = new RaycastShapeData();
 
     private RaycastHit bestHit = new RaycastHit();
     private RaycastHit closestHit = new RaycastHit();
 
-    private AABBData aabbData = new AABBData();
-
-    public RaycastService(List<CollisionShapeData> collisionMapPayloads, LayerCategoryMapService layerCategoryMapService, RaycastShapeData raycastShapeData)
+    public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService)
     {
-        this.collisionMapPayloads = collisionMapPayloads;
+        this.shapes = shapes;
         this.layerCategoryMapService = layerCategoryMapService;
-        this.raycastShapeData = raycastShapeData;
     }
 
     public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, ECollisionCategory collisionCategory, int layerMask)
@@ -47,7 +44,7 @@ public class RaycastService
         raycastShapeData.set(origin.x, origin.y, origin.z, dx, dy, dz);
 
         //TODO: Оптимизировать нет смылса кидать постоянно на каждый обьект рейкаст
-        for (var shape : collisionMapPayloads)
+        for (var shape : shapes)
         {
             if (shape.LayerCategory != collisionCategory)
                 continue;
@@ -85,6 +82,8 @@ public class RaycastService
 
     private RaycastHit raycastToBox(float maxDistance, CollisionShapeData shape)
     {
+        closestHit.clear();
+
         var hx = shape.Size.x * shape.Scale.x * 0.5f;
         var hy = shape.Size.y * shape.Scale.y * 0.5f;
         var hz = shape.Size.z * shape.Scale.z * 0.5f;
@@ -104,19 +103,88 @@ public class RaycastService
         var tMin = 0f;
         var tMax = maxDistance;
 
-        if (Math.abs(raycastShapeData.dx) < Float.MIN_VALUE
-                || Math.abs(raycastShapeData.dy) < Float.MIN_VALUE
-                || Math.abs(raycastShapeData.dz) < Float.MIN_VALUE
-        )
+        if (checkMinValue())
         {
-            closestHit.clear();
             return closestHit;
         }
 
+        if (raycastShapeData.ox < minX || raycastShapeData.ox > maxX)
+            return closestHit;
+        else
+        {
+            var inv = 1f / raycastShapeData.dx;
 
+            var t1 = (minX - raycastShapeData.ox) * inv;
+            var t2 = (maxX - raycastShapeData.ox) * inv;
 
+            if (t1 >t2)
+            {
+                var tmp = t1;
+                t1 = t2;
+                t2 = tmp;
+            }
 
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
 
+            if (tMax < tMin)
+                return closestHit;
+        }
+
+        if (raycastShapeData.oy < minY || raycastShapeData.oy > maxY)
+            return closestHit;
+        else
+        {
+            var inv = 1f / raycastShapeData.dy;
+
+            var t1 = (minX - raycastShapeData.oy) * inv;
+            var t2 = (maxX - raycastShapeData.oy) * inv;
+
+            if (t1 >t2)
+            {
+                var tmp = t1;
+                t1 = t2;
+                t2 = tmp;
+            }
+
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+
+            if (tMax < tMin)
+                return closestHit;
+        }
+
+        if (raycastShapeData.oz < minZ || raycastShapeData.oz > maxZ)
+            return closestHit;
+        else
+        {
+            var inv = 1f / raycastShapeData.dz;
+
+            var t1 = (minX - raycastShapeData.oz) * inv;
+            var t2 = (maxX - raycastShapeData.oz) * inv;
+
+            if (t1 >t2)
+            {
+                var tmp = t1;
+                t1 = t2;
+                t2 = tmp;
+            }
+
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+
+            if (tMax < tMin)
+                return closestHit;
+        }
+
+        if (tMin < 0f || tMax > maxDistance)
+            return closestHit;
+
+        var pointVector = new Vector3f(raycastShapeData.ox + raycastShapeData.dx * tMin, raycastShapeData.oy + raycastShapeData.dy * tMin, raycastShapeData.oz + raycastShapeData.dz * tMin);
+
+        closestHit.setHit(true);
+        closestHit.setDistance(tMin);
+        closestHit.setPoint(pointVector);
         return closestHit;
     }
 
@@ -130,8 +198,36 @@ public class RaycastService
         return closestHit;
     }
 
+//    private void checkIntersectionAABBAlongAxis(float minAxis, float maxAxis, float originAxis, float directionAxis)
+//    {
+//        var inv = 1f / originAxis;
+//
+//        var t1 = (minAxis - directionAxis) * inv;
+//        var t2 = (maxAxis - directionAxis) * inv;
+//
+//        if (t1 >t2)
+//        {
+//            var tmp = t1;
+//            t1 = t2;
+//            t2 = tmp;
+//        }
+//
+//        tMin = Math.max(tMin, t1);
+//        tMax = Math.min(tMax, t2);
+//
+//        if (tMax < tMin)
+//            return closestHit;
+//    }
+
     private static float sqr(float value)
     {
         return value * value;
+    }
+
+    private boolean checkMinValue()
+    {
+        return Math.abs(raycastShapeData.dx) < Float.MIN_VALUE
+                || Math.abs(raycastShapeData.dy) < Float.MIN_VALUE
+                || Math.abs(raycastShapeData.dz) < Float.MIN_VALUE;
     }
 }
