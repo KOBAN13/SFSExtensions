@@ -2,6 +2,7 @@ package com.a51integrated.sfs2x.services;
 
 import com.a51integrated.sfs2x.data.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
+import com.a51integrated.sfs2x.data.ECollisionCategory;
 import com.a51integrated.sfs2x.data.PlayerCollider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -50,6 +51,9 @@ public class CollisionMapService
         //TODO: Оптимизировать нет смылса проверять коллизию с каждым обьектом на сцене
         for (var shape : shapes)
         {
+            if (shape.LayerCategory == ECollisionCategory.Ground)
+                continue;
+
             if (intersectsShape(shape))
             {
                 return true;

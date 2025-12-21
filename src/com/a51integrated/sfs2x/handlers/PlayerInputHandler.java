@@ -13,11 +13,10 @@ public class PlayerInputHandler extends BaseClientRequestHandler
         var roomState = ((GameExtension)getParentExtension()).getRoomStateService();
         var playerState = roomState.get(sender);
 
+        playerState.eulerAngleY = data.getFloat("eulerAngleY");
         playerState.horizontal = data.getFloat("horizontal");
         playerState.vertical = data.getFloat("vertical");
         playerState.isRunning = data.getBool("isRunning");
-        playerState.xRotation = data.getFloat("horizontal");
-        playerState.zRotation = data.getFloat("vertical");
 
         if (data.getBool("isJumping"))
         {

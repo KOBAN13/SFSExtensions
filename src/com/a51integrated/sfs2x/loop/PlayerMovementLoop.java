@@ -4,6 +4,9 @@ import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.CollisionMapService;
 import com.a51integrated.sfs2x.services.RoomStateService;
+import org.joml.Math;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class PlayerMovementLoop implements Runnable
 {
@@ -15,17 +18,15 @@ public class PlayerMovementLoop implements Runnable
     private static final float JUMP_VELOCITY = 8f;
     private static final float MAX_JUMP_HEIGHT = 9f;
 
-    // 20 тиков/сек
     private static final float DELTA_TIME = 0.05f;
 
-    // Макс. допустимый шаг по XZ за тик (античит/антиспайк)
     private static final float THRESHOLD = 1.5f;
     private static final float THRESHOLD_SQR = THRESHOLD * THRESHOLD;
 
-    // Параметры капсулы игрока для серверной коллизии
-    // (желательно брать из конфига/room settings)
     private static final float PLAYER_RADIUS = 0.4f;
     private static final float PLAYER_HEIGHT = 1.8f;
+
+    public static final float Rad2Deg = 57.29578f;
 
     private long snapshotId = 0;
 
@@ -60,8 +61,17 @@ public class PlayerMovementLoop implements Runnable
             playerState.prevX = baseX;
             playerState.prevZ = baseZ;
 
-            var dx = playerState.horizontal * speed * DELTA_TIME;
-            var dz = playerState.vertical   * speed * DELTA_TIME;
+            playerState.rotation = Math.toDegrees(Math.atan2(playerState.horizontal, playerState.vertical)) + playerState.eulerAngleY;
+
+            var targetDirection = new Quaternionf()
+                    .rotateY(Math.toRadians(playerState.rotation))
+                    .transform(new Vector3f(0, 0, 1)).normalize();
+
+            var dx = targetDirection.x * speed * DELTA_TIME;
+            var dz = targetDirection.z * speed * DELTA_TIME;
+
+            game.trace("PlayerMovementLoop starting dx=" + dx + ", dz=" + dz);
+            game.trace("Rotation: " + playerState.rotation);
 
             var stepSqr = dx * dx + dz * dz;
 

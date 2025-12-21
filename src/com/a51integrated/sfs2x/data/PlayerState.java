@@ -7,7 +7,8 @@ public class PlayerState
     public long snapshotId;
     public float serverTime;
     public float x, y, z;
-    public float xRotation, zRotation;
+    public float rotation;
+    public float eulerAngleY;
     public float prevX, prevY, prevZ;
     public float horizontal, vertical;
     public float verticalVelocity;
