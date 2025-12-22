@@ -30,6 +30,8 @@ public class PlayerMovementLoop implements Runnable
 
     private long snapshotId = 0;
 
+    private Vector3f targetDirection = new Vector3f();
+
     public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService, CollisionMapService collisionMapService)
     {
         this.game = game;
@@ -52,7 +54,15 @@ public class PlayerMovementLoop implements Runnable
             playerState.serverTime = serverTime;
             playerState.snapshotId = snapshotId;
 
-            var speed = playerState.isRunning ? 8f : 4f;
+            var targetSpeed = playerState.isRunning ? 8f : 4f;
+
+            var inputDirection = new Vector3f(playerState.horizontal, 0f, playerState.vertical);
+
+            if (inputDirection.lengthSquared() <= 0f)
+                targetSpeed = 0f;
+
+            var speedOffset = 0.1f;
+            var inputMagnitude = 1f;
 
             var baseX = playerState.x;
             var baseY = playerState.y;
@@ -61,14 +71,22 @@ public class PlayerMovementLoop implements Runnable
             playerState.prevX = baseX;
             playerState.prevZ = baseZ;
 
-            playerState.rotation = Math.toDegrees(Math.atan2(playerState.horizontal, playerState.vertical)) + playerState.eulerAngleY;
+            if (inputDirection.lengthSquared() > 0f)
+            {
+                playerState.rotation = Math.toDegrees(Math.atan2(playerState.horizontal, playerState.vertical)) + playerState.eulerAngleY;
 
-            var targetDirection = new Quaternionf()
-                    .rotateY(Math.toRadians(playerState.rotation))
-                    .transform(new Vector3f(0, 0, 1)).normalize();
+                targetDirection = new Quaternionf()
+                        .rotateY(Math.toRadians(playerState.rotation))
+                        .transform(new Vector3f(0, 0, 1)).normalize();
+            }
 
-            var dx = targetDirection.x * speed * DELTA_TIME;
-            var dz = targetDirection.z * speed * DELTA_TIME;
+            var dx = targetDirection.x * targetSpeed * DELTA_TIME;
+            var dz = targetDirection.z * targetSpeed * DELTA_TIME;
+
+            game.trace("Input Direction: " + inputDirection);
+
+            game.trace("Target Direction X : " + targetDirection.x + " Target Direction Z : " + targetDirection.z);
+            game.trace("Player State horizontal : " + playerState.horizontal + "Player State vertical : "  + playerState.vertical);
 
             game.trace("PlayerMovementLoop starting dx=" + dx + ", dz=" + dz);
             game.trace("Rotation: " + playerState.rotation);
