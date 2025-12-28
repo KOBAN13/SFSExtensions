@@ -27,8 +27,6 @@ public class RaycastHandler extends BaseClientRequestHandler
         var originData = object.getSFSArray("originVector");
         var directionData = object.getSFSArray("directionVector");
 
-        var collisionCode = object.getInt("collisionType");
-
         if (originData.size() < 3 || directionData.size() < 3)
         {
             sendError(result, "Origin or Direction Vector Size Mismatch", sender);
@@ -57,9 +55,7 @@ public class RaycastHandler extends BaseClientRequestHandler
         var originVector = new Vector3f(ox, oy, oz);
         var directionVector = new Vector3f(dx, dy, dz);
 
-        var collisionType = Enum.valueOf(ECollisionCategory.class, collisionCode.toString());
-
-        var raycastHit = raycastService.raycast(originVector, directionVector, distance, collisionType, layerMask);
+        var raycastHit = raycastService.raycast(originVector, directionVector, distance, layerMask);
 
         sendSuccess(result, raycastHit, sender);
     }
@@ -68,7 +64,7 @@ public class RaycastHandler extends BaseClientRequestHandler
     {
         resultObject.putUtfString(SFSResponseHelper.ERROR, message);
         resultObject.putBool(SFSResponseHelper.OK, false);
-        send(SFSResponseHelper.KICK_USER_IN_ROOM, resultObject, sender);
+        send(SFSResponseHelper.RAYCAST, resultObject, sender);
     }
 
     private void sendSuccess(SFSObject resultObject, RaycastHit raycastHit, User targetUser)
@@ -83,6 +79,6 @@ public class RaycastHandler extends BaseClientRequestHandler
         resultObject.putFloat("y", pointVector.y);
         resultObject.putFloat("z", pointVector.z);
 
-        send(SFSResponseHelper.KICK_USER_IN_ROOM, resultObject, targetUser);
+        send(SFSResponseHelper.RAYCAST, resultObject, targetUser);
     }
 }

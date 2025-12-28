@@ -14,9 +14,9 @@ public class AABBCollisionService
         var hy = halfScaled(shape.Size.y, shape.Scale.y);
         var hz = halfScaled(shape.Size.z, shape.Scale.z);
 
-        var cx = shape.Size.x * shape.Scale.x;
-        var cy = shape.Size.y * shape.Scale.y;
-        var cz = shape.Size.z * shape.Scale.z;
+        var cx = shape.Center.x * shape.Scale.x;
+        var cy = shape.Center.y * shape.Scale.y;
+        var cz = shape.Center.z * shape.Scale.z;
 
         aabbData.setCenterHalfExtents(cx, cy, cz, hx, hy, hz);
 

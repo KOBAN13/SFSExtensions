@@ -6,7 +6,7 @@ public final class RaycastHit
 {
     private boolean hit;
     private float distance;
-    private Vector3f point;
+    private Vector3f point = new Vector3f();
 
     public void clear()
     {

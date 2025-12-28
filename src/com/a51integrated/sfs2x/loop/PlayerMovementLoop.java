@@ -83,14 +83,6 @@ public class PlayerMovementLoop implements Runnable
             var dx = targetDirection.x * targetSpeed * DELTA_TIME;
             var dz = targetDirection.z * targetSpeed * DELTA_TIME;
 
-            game.trace("Input Direction: " + inputDirection);
-
-            game.trace("Target Direction X : " + targetDirection.x + " Target Direction Z : " + targetDirection.z);
-            game.trace("Player State horizontal : " + playerState.horizontal + "Player State vertical : "  + playerState.vertical);
-
-            game.trace("PlayerMovementLoop starting dx=" + dx + ", dz=" + dz);
-            game.trace("Rotation: " + playerState.rotation);
-
             var stepSqr = dx * dx + dz * dz;
 
             if (stepSqr > THRESHOLD_SQR)
@@ -102,8 +94,6 @@ public class PlayerMovementLoop implements Runnable
             var targetZ = baseZ + dz;
 
             var isColliding = collisionMapService.isColliding(targetX, baseY, targetZ);
-
-            game.trace("isColliding " + isColliding);
 
             if (!isColliding)
             {

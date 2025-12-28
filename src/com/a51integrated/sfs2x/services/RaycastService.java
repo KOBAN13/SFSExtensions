@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
 import org.joml.Vector3f;
 
@@ -9,20 +10,23 @@ public class RaycastService
 {
     private final List<CollisionShapeData> shapes;
     private final LayerCategoryMapService layerCategoryMapService;
+    private final GameExtension gameExtension;
 
     private RaycastShapeData raycastShapeData = new RaycastShapeData();
 
     private RaycastHit bestHit = new RaycastHit();
     private RaycastHit closestHit = new RaycastHit();
 
-    public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService)
+    public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService, GameExtension gameExtension)
     {
         this.shapes = shapes;
         this.layerCategoryMapService = layerCategoryMapService;
+        this.gameExtension = gameExtension;
     }
 
-    public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, ECollisionCategory collisionCategory, int layerMask)
+    public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, int layerMask)
     {
+        gameExtension.trace("Distance: " + maxDistance);
         if (maxDistance < 0)
             return bestHit;
 
@@ -33,6 +37,8 @@ public class RaycastService
         var sqrZ = sqr(direction.z);
 
         var len = (float) Math.sqrt(sqrX + sqrY + sqrZ);
+
+        gameExtension.trace("Len: " + len);
 
         if (len < Float.MIN_VALUE)
             return bestHit;
@@ -46,16 +52,27 @@ public class RaycastService
         //TODO: Оптимизировать нет смылса кидать постоянно на каждый обьект рейкаст
         for (var shape : shapes)
         {
-            if (shape.LayerCategory != collisionCategory)
+            var layerValid = layerCategoryMapService.layerInMask(shape.Layer, layerMask);
+
+            if (!layerValid)
                 continue;
 
-            if (layerCategoryMapService.layerInMask(shape.Layer, layerMask))
+            if (shape.Type != ECollisionShapeType.Box)
                 continue;
+
+            gameExtension.trace("shape: " + shape.Name);
 
             closestHit = raycastShape(maxDistance, shape);
 
-            if (closestHit.getHit() && closestHit.getDistance() < bestHit.getDistance())
-                bestHit = closestHit;
+            if (!closestHit.getHit())
+                continue;
+
+            if (!bestHit.getHit() || closestHit.getDistance() < bestHit.getDistance())
+            {
+                bestHit.setHit(true);
+                bestHit.setDistance(closestHit.getDistance());
+                bestHit.setPoint(new Vector3f(closestHit.getPoint()));
+            }
         }
 
         return bestHit;
@@ -88,9 +105,9 @@ public class RaycastService
         var hy = shape.Size.y * shape.Scale.y * 0.5f;
         var hz = shape.Size.z * shape.Scale.z * 0.5f;
 
-        var cx = shape.Size.x * shape.Scale.x;
-        var cy = shape.Size.y * shape.Scale.y;
-        var cz = shape.Size.z * shape.Scale.z;
+        var cx = shape.Center.x * shape.Scale.x;
+        var cy = shape.Center.y * shape.Scale.y;
+        var cz = shape.Center.z * shape.Scale.z;
 
         var minX = cx - hx;
         var minY = cy - hy;
@@ -103,13 +120,16 @@ public class RaycastService
         var tMin = 0f;
         var tMax = maxDistance;
 
-        if (checkMinValue())
+        if (checkMinValue(raycastShapeData.dx))
         {
-            return closestHit;
-        }
+            if (raycastShapeData.ox < minX || raycastShapeData.ox > maxX)
+            {
+                gameExtension.trace("ox: " + raycastShapeData.ox + "min: " + minX + " max: " + maxX);
 
-        if (raycastShapeData.ox < minX || raycastShapeData.ox > maxX)
-            return closestHit;
+                gameExtension.trace("ox меньше minx || ox больше maxx");
+                return closestHit;
+            }
+        }
         else
         {
             var inv = 1f / raycastShapeData.dx;
@@ -129,16 +149,26 @@ public class RaycastService
 
             if (tMax < tMin)
                 return closestHit;
+
+            gameExtension.trace("X посчитан успешно");
         }
 
-        if (raycastShapeData.oy < minY || raycastShapeData.oy > maxY)
-            return closestHit;
+        if (checkMinValue(raycastShapeData.dy))
+        {
+            if (raycastShapeData.oy < minY || raycastShapeData.oy > maxY)
+            {
+                gameExtension.trace("oy: " + raycastShapeData.oy + "min: " + minY + " max: " + maxY);
+
+                gameExtension.trace("oy меньше miny || oy больше maxy");
+                return closestHit;
+            }
+        }
         else
         {
             var inv = 1f / raycastShapeData.dy;
 
-            var t1 = (minX - raycastShapeData.oy) * inv;
-            var t2 = (maxX - raycastShapeData.oy) * inv;
+            var t1 = (minY - raycastShapeData.oy) * inv;
+            var t2 = (maxY - raycastShapeData.oy) * inv;
 
             if (t1 >t2)
             {
@@ -152,16 +182,24 @@ public class RaycastService
 
             if (tMax < tMin)
                 return closestHit;
+
+            gameExtension.trace("Y посчитан успешно");
         }
 
-        if (raycastShapeData.oz < minZ || raycastShapeData.oz > maxZ)
-            return closestHit;
+        if (checkMinValue(raycastShapeData.dz))
+        {
+            if (raycastShapeData.oz < minZ || raycastShapeData.oz > maxZ)
+            {
+                gameExtension.trace("oz меньше minx || oz больше maxx");
+                return closestHit;
+            }
+        }
         else
         {
             var inv = 1f / raycastShapeData.dz;
 
-            var t1 = (minX - raycastShapeData.oz) * inv;
-            var t2 = (maxX - raycastShapeData.oz) * inv;
+            var t1 = (minZ - raycastShapeData.oz) * inv;
+            var t2 = (maxZ - raycastShapeData.oz) * inv;
 
             if (t1 >t2)
             {
@@ -173,17 +211,34 @@ public class RaycastService
             tMin = Math.max(tMin, t1);
             tMax = Math.min(tMax, t2);
 
+            gameExtension.trace("tMin: " + tMin + " tMax: " + tMax);
+            gameExtension.trace("minZ: " + minZ + " maxZ: " + maxZ);
+            gameExtension.trace("t1: " + t1 + " t2: " + t2);
+            gameExtension.trace("inv: " + inv + " dz: " + raycastShapeData.dz);
+
             if (tMax < tMin)
                 return closestHit;
+
+            gameExtension.trace("Z посчитан успешно");
         }
 
-        if (tMin < 0f || tMax > maxDistance)
+        if (tMax < 0f)
             return closestHit;
 
-        var pointVector = new Vector3f(raycastShapeData.ox + raycastShapeData.dx * tMin, raycastShapeData.oy + raycastShapeData.dy * tMin, raycastShapeData.oz + raycastShapeData.dz * tMin);
+        var hitT = (tMin >= 0f) ? tMin : tMax;
+
+        gameExtension.trace("hitT: " + hitT);
+
+        if (hitT > maxDistance)
+            return closestHit;
+
+        var pointVector = new Vector3f(
+                raycastShapeData.ox + raycastShapeData.dx * hitT,
+                raycastShapeData.oy + raycastShapeData.dy * hitT,
+                raycastShapeData.oz + raycastShapeData.dz * hitT);
 
         closestHit.setHit(true);
-        closestHit.setDistance(tMin);
+        closestHit.setDistance(hitT);
         closestHit.setPoint(pointVector);
         return closestHit;
     }
@@ -224,10 +279,8 @@ public class RaycastService
         return value * value;
     }
 
-    private boolean checkMinValue()
+    private boolean checkMinValue(float directionAxis)
     {
-        return Math.abs(raycastShapeData.dx) < Float.MIN_VALUE
-                || Math.abs(raycastShapeData.dy) < Float.MIN_VALUE
-                || Math.abs(raycastShapeData.dz) < Float.MIN_VALUE;
+        return Math.abs(directionAxis) < Float.MIN_VALUE;
     }
 }
