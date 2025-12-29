@@ -6,13 +6,13 @@ public final class RaycastHit
 {
     private boolean hit;
     private float distance;
-    private Vector3f point = new Vector3f();
+    private final Vector3f point = new Vector3f();
 
     public void clear()
     {
         hit = false;
         distance = 0;
-        point = point.zero();
+        point.zero();
     }
 
     public void setHit(boolean hit)
@@ -30,7 +30,19 @@ public final class RaycastHit
 
     public void setPoint(Vector3f point)
     {
-        this.point = point;
+        this.point.set(point);
+    }
+
+    public void setPoint(float x, float y, float z)
+    {
+        point.set(x, y, z);
+    }
+
+    public void copyFrom(RaycastHit other)
+    {
+        hit = other.hit;
+        distance = other.distance;
+        point.set(other.point);
     }
 
     public boolean getHit()
