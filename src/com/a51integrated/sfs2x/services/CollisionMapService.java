@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
 import com.a51integrated.sfs2x.data.ECollisionCategory;
@@ -23,7 +24,7 @@ public class CollisionMapService
     private float playerRadius = 0.6f;
     private float playerHeight = 2f;
 
-    public CollisionMapService(String path)
+    public CollisionMapService(String path, GameExtension game)
     {
         var collisionMapPayload = DeserializeCollisionMap(path);
 
@@ -31,7 +32,7 @@ public class CollisionMapService
 
         shapes.addAll(collisionMapPayload.Shapes);
 
-        raycastService = new RaycastService(shapes, layerCategoryMapService);
+        raycastService = new RaycastService(shapes, layerCategoryMapService, game);
     }
 
     public void clear()

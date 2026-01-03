@@ -37,7 +37,7 @@ public class GameExtension extends SFSExtension
 
         var path = getConfigProperties().getProperty("collision.map.path");
 
-        collisionMapService = new CollisionMapService(path);
+        collisionMapService = new CollisionMapService(path, this);
 
         var sfs = SmartFoxServer.getInstance();
 

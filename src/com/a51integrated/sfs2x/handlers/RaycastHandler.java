@@ -1,6 +1,5 @@
 package com.a51integrated.sfs2x.handlers;
 
-import com.a51integrated.sfs2x.data.ECollisionCategory;
 import com.a51integrated.sfs2x.data.RaycastHit;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.CollisionMapService;
@@ -75,9 +74,9 @@ public class RaycastHandler extends BaseClientRequestHandler
         resultObject.putFloat("distance", raycastHit.getDistance());
 
         var pointVector = raycastHit.getPoint();
-        resultObject.putFloat("x", pointVector.x);
-        resultObject.putFloat("y", pointVector.y);
-        resultObject.putFloat("z", pointVector.z);
+        resultObject.putFloat("xPoint", pointVector.x);
+        resultObject.putFloat("yPoint", pointVector.y);
+        resultObject.putFloat("zPoint", pointVector.z);
 
         send(SFSResponseHelper.RAYCAST, resultObject, targetUser);
     }

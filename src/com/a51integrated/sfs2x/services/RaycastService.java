@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
 import org.joml.Vector3f;
 
@@ -10,12 +11,14 @@ public class RaycastService
     private final List<CollisionShapeData> shapes;
     private final LayerCategoryMapService layerCategoryMapService;
 
+    private final GameExtension game;
     private static final float AXIS_EPSILON = 1e-6f;
     private final RaycastShapeData raycastShapeData = new RaycastShapeData();
     private final SlabRange slabRange = new SlabRange();
 
-    public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService)
+    public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService, GameExtension game)
     {
+        this.game = game;
         this.shapes = shapes;
         this.layerCategoryMapService = layerCategoryMapService;
     }
@@ -52,9 +55,12 @@ public class RaycastService
             if (!raycastShape(maxDistance, shape, closestHit))
                 continue;
 
+            game.trace("Shape: " + shape.Name);
+
             if (!bestHit.getHit() || closestHit.getDistance() < bestHit.getDistance())
             {
                 bestHit.copyFrom(closestHit);
+                game.trace("Found: " + shape.Name);
             }
         }
 
@@ -134,13 +140,85 @@ public class RaycastService
     private boolean raycastToSphere(float maxDistance, CollisionShapeData shape, RaycastHit outHit)
     {
         outHit.clear();
-        return false;
+
+        var cx = shape.Center.x * shape.Scale.x;
+        var cy = shape.Center.y * shape.Scale.y;
+        var cz = shape.Center.z * shape.Scale.z;
+        var radius = shape.Radius * shape.Scale.x;
+
+        var hitT = intersectRaySphere(cx, cy, cz, radius, maxDistance);
+
+        if (hitT == Float.POSITIVE_INFINITY)
+            return false;
+
+        outHit.setHit(true);
+        outHit.setDistance(hitT);
+        outHit.setPoint(
+                raycastShapeData.ox + raycastShapeData.dx * hitT,
+                raycastShapeData.oy + raycastShapeData.dy * hitT,
+                raycastShapeData.oz + raycastShapeData.dz * hitT);
+        return true;
     }
 
     private boolean raycastToCapsule(float maxDistance, CollisionShapeData shape, RaycastHit outHit)
     {
         outHit.clear();
-        return false;
+
+        var cx = shape.Center.x * shape.Scale.x;
+        var cy = shape.Center.y * shape.Scale.y;
+        var cz = shape.Center.z * shape.Scale.z;
+        var radius = shape.Radius * shape.Scale.x;
+        var height = shape.Height * shape.Scale.y;
+
+        var hitT = Float.POSITIVE_INFINITY;
+
+        var dx = raycastShapeData.dx;
+        var dz = raycastShapeData.dz;
+        var a = dx * dx + dz * dz;
+
+        if (a > AXIS_EPSILON)
+        {
+            var ox = raycastShapeData.ox;
+            var oz = raycastShapeData.oz;
+            var ocx = ox - cx;
+            var ocz = oz - cz;
+
+            var b = ocx * dx + ocz * dz;
+            var c = ocx * ocx + ocz * ocz - radius * radius;
+
+            var discriminant = b * b - a * c;
+
+            if (discriminant >= 0f)
+            {
+                var sqrtDisc = (float)Math.sqrt(discriminant);
+                var t1 = (-b - sqrtDisc) / a;
+                var t2 = (-b + sqrtDisc) / a;
+
+                hitT = pickCapsuleBodyHit(cy, height, maxDistance, hitT, t1);
+                hitT = pickCapsuleBodyHit(cy, height, maxDistance, hitT, t2);
+            }
+        }
+
+        var tBottom = intersectRaySphere(cx, cy, cz, radius, maxDistance);
+
+        if (tBottom < hitT)
+            hitT = tBottom;
+
+        var tTop = intersectRaySphere(cx, cy + height, cz, radius, maxDistance);
+
+        if (tTop < hitT)
+            hitT = tTop;
+
+        if (hitT == Float.POSITIVE_INFINITY)
+            return false;
+
+        outHit.setHit(true);
+        outHit.setDistance(hitT);
+        outHit.setPoint(
+                raycastShapeData.ox + raycastShapeData.dx * hitT,
+                raycastShapeData.oy + raycastShapeData.dy * hitT,
+                raycastShapeData.oz + raycastShapeData.dz * hitT);
+        return true;
     }
 
     private boolean intersectSlab(float minAxis, float maxAxis, float originAxis, float directionAxis, SlabRange range)
@@ -173,6 +251,56 @@ public class RaycastService
     private boolean isNearlyZero(float directionAxis)
     {
         return Math.abs(directionAxis) < AXIS_EPSILON;
+    }
+
+    private float pickCapsuleBodyHit(float capsuleBottomY, float capsuleHeight, float maxDistance, float currentBestT, float t)
+    {
+        if (t < 0f || t > maxDistance || t >= currentBestT)
+            return currentBestT;
+
+        var y = raycastShapeData.oy + raycastShapeData.dy * t;
+        var topY = capsuleBottomY + capsuleHeight;
+
+        if (y < capsuleBottomY || y > topY)
+            return currentBestT;
+
+        return t;
+    }
+
+    private float intersectRaySphere(float cx, float cy, float cz, float radius, float maxDistance)
+    {
+        var ox = raycastShapeData.ox;
+        var oy = raycastShapeData.oy;
+        var oz = raycastShapeData.oz;
+        var dx = raycastShapeData.dx;
+        var dy = raycastShapeData.dy;
+        var dz = raycastShapeData.dz;
+
+        var mx = ox - cx;
+        var my = oy - cy;
+        var mz = oz - cz;
+
+        var b = mx * dx + my * dy + mz * dz;
+        var c = mx * mx + my * my + mz * mz - radius * radius;
+
+        if (c > 0f && b > 0f)
+            return Float.POSITIVE_INFINITY;
+
+        var discriminant = b * b - c;
+
+        if (discriminant < 0f)
+            return Float.POSITIVE_INFINITY;
+
+        var sqrtDisc = (float)Math.sqrt(discriminant);
+        var t = -b - sqrtDisc;
+
+        if (t < 0f)
+            t = -b + sqrtDisc;
+
+        if (t < 0f || t > maxDistance)
+            return Float.POSITIVE_INFINITY;
+
+        return t;
     }
 
     private static final class SlabRange
