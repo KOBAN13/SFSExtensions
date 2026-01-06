@@ -24,22 +24,22 @@ public class AABBCollisionService
         var hy = halfScaled(shape.Size.y, shape.Scale.y);
         var hz = halfScaled(shape.Size.z, shape.Scale.z);
 
-        var cx = shape.Center.x;
-        var cy = shape.Center.y;
-        var cz = shape.Center.z;
+        var lcx = shape.Center.x;
+        var lcy = shape.Center.y;
+        var lcz = shape.Center.z;
 
         if (isIdentityRotation(shape.Rotation))
         {
-            aabbData.setCenterHalfExtents(cx, cy, cz, hx, hy, hz);
+            aabbData.setCenterHalfExtents(lcx, lcy, lcz, hx, hy, hz);
             return intersectsCapsuleAabbXZ(player);
         }
 
-        rotateService.setAabbFromObb(cx, cy, cz, hx, hy, hz, shape.Rotation);
+        rotateService.setAabbFromObb(lcx, lcy, lcz, hx, hy, hz, shape.Rotation);
 
         if (!intersectsCapsuleAabbXZ(player))
             return false;
 
-        return rotateService.intersectsCapsuleObb(player, cx, cy, cz, hx, hy, hz, shape.Rotation);
+        return rotateService.intersectsCapsuleObb(player, lcx, lcy, lcz, hx, hy, hz, shape.Rotation);
     }
 
 
