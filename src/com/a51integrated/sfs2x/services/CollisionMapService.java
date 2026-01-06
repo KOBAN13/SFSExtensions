@@ -16,16 +16,18 @@ public class CollisionMapService
 {
     private final List<CollisionShapeData> shapes = new ArrayList<>();
     private final LayerCategoryMapService layerCategoryMapService = new LayerCategoryMapService();
-    private final AABBCollisionService aabbService = new AABBCollisionService();
+    private final AABBCollisionService aabbService;
     private final PlayerCollider playerCollider = new PlayerCollider();
     private final RaycastService raycastService;
 
     //TODO: SDK Parameters
-    private float playerRadius = 0.6f;
-    private float playerHeight = 2f;
+    private float playerRadius = 0.5f;
+    private float playerHeight = 3.5f;
 
-    public CollisionMapService(String path, GameExtension game)
+    public CollisionMapService(String path,  GameExtension game)
     {
+        aabbService = new AABBCollisionService(game);
+
         var collisionMapPayload = DeserializeCollisionMap(path);
 
         assert collisionMapPayload != null;

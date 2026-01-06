@@ -1,12 +1,22 @@
 package com.a51integrated.sfs2x.services;
 
+import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.AABBData;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
 import com.a51integrated.sfs2x.data.PlayerCollider;
+import com.a51integrated.sfs2x.data.Quaternion;
 
 public class AABBCollisionService
 {
+    private static final float ROTATION_EPSILON = 1e-6f;
     private final AABBData aabbData = new AABBData();
+    private final AABBCollisionRotateService rotateService = new AABBCollisionRotateService(aabbData);
+
+    private final GameExtension gameExtension;
+
+    public AABBCollisionService(GameExtension gameExtension) {
+        this.gameExtension = gameExtension;
+    }
 
     public boolean collisionCapsuleWithBox(CollisionShapeData shape, PlayerCollider player)
     {
@@ -14,14 +24,24 @@ public class AABBCollisionService
         var hy = halfScaled(shape.Size.y, shape.Scale.y);
         var hz = halfScaled(shape.Size.z, shape.Scale.z);
 
-        var cx = shape.Center.x * shape.Scale.x;
-        var cy = shape.Center.y * shape.Scale.y;
-        var cz = shape.Center.z * shape.Scale.z;
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
 
-        aabbData.setCenterHalfExtents(cx, cy, cz, hx, hy, hz);
+        if (isIdentityRotation(shape.Rotation))
+        {
+            aabbData.setCenterHalfExtents(cx, cy, cz, hx, hy, hz);
+            return intersectsCapsuleAabbXZ(player);
+        }
 
-        return intersectsCapsuleAabbXZ(player);
+        rotateService.setAabbFromObb(cx, cy, cz, hx, hy, hz, shape.Rotation);
+
+        if (!intersectsCapsuleAabbXZ(player))
+            return false;
+
+        return rotateService.intersectsCapsuleObb(player, cx, cy, cz, hx, hy, hz, shape.Rotation);
     }
+
 
     public boolean collisionCapsuleWithSphere(CollisionShapeData shape, PlayerCollider player)
     {
@@ -84,6 +104,17 @@ public class AABBCollisionService
         var dz = player.z - closestZ;
 
         return sqr(dx) + sqr(dz) <= sqr(player.radius);
+    }
+
+    private boolean isIdentityRotation(Quaternion rotation)
+    {
+        if (rotation == null)
+            return true;
+
+        return Math.abs(rotation.x) < ROTATION_EPSILON
+                && Math.abs(rotation.y) < ROTATION_EPSILON
+                && Math.abs(rotation.z) < ROTATION_EPSILON
+                && Math.abs(Math.abs(rotation.w) - 1f) < ROTATION_EPSILON;
     }
 
     private static float scaled(float value, float scale)
