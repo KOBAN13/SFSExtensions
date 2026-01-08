@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x;
 
+import com.a51integrated.sfs2x.handlers.CollisionDataHandler;
 import com.a51integrated.sfs2x.handlers.JoinGameRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.PlayerInputHandler;
 import com.a51integrated.sfs2x.handlers.RaycastHandler;
@@ -43,6 +44,7 @@ public class GameExtension extends SFSExtension
 
         addRequestHandler(SFSResponseHelper.PLAYER_INPUT, PlayerInputHandler.class);
         addRequestHandler(SFSResponseHelper.RAYCAST, new RaycastHandler(collisionMapService));
+        addRequestHandler(SFSResponseHelper.COLLISION_DATA, new CollisionDataHandler(collisionMapService));
         addEventHandler(SFSEventType.USER_JOIN_ROOM, JoinGameRoomServerEventHandler.class);
 
         gameLoop = sfs.getTaskScheduler().scheduleAtFixedRate(

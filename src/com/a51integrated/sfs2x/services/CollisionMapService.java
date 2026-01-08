@@ -42,9 +42,12 @@ public class CollisionMapService
         shapes.clear();
     }
 
-    public RaycastService getRaycastService()
-    {
+    public RaycastService getRaycastService() {
         return raycastService;
+    }
+
+    public List<CollisionShapeData> getShapes() {
+        return shapes;
     }
 
     public boolean isColliding(float px, float py, float pz)

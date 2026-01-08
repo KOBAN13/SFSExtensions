@@ -26,6 +26,7 @@ public class SFSResponseHelper
     public static final String PLAYER_INPUT = "playerInput";
     public static final String PLAYER_STATE = "playerState";
 
+    public static final String COLLISION_DATA = "collisionData";
     public static final String RAYCAST = "raycast";
 }
 
