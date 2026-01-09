@@ -8,9 +8,6 @@ public class ServerCollisionData
 {
     private static final float ROTATION_EPSILON = 1e-6f;
     private final String shapeId;
-    private final ECollisionShapeType shapeType;
-    private final int layer;
-    private final String layerName;
     private final boolean hasObb;
     private final float obbCx, obbCy, obbCz;
     private final float obbHx, obbHy, obbHz;
@@ -19,9 +16,6 @@ public class ServerCollisionData
     private final float maxX, maxY, maxZ;
 
     public ServerCollisionData(String shapeId,
-                               ECollisionShapeType shapeType,
-                               int layer,
-                               String layerName,
                                boolean hasObb,
                                float obbCx, float obbCy, float obbCz,
                                float obbHx, float obbHy, float obbHz,
@@ -30,9 +24,6 @@ public class ServerCollisionData
                                float maxX, float maxY, float maxZ)
     {
         this.shapeId = shapeId;
-        this.shapeType = shapeType;
-        this.layer = layer;
-        this.layerName = layerName;
         this.hasObb = hasObb;
         this.obbCx = obbCx;
         this.obbCy = obbCy;
@@ -55,9 +46,9 @@ public class ServerCollisionData
         var rotation = shape.Rotation;
         var isRotated = !isIdentityRotation(rotation);
 
-        var cx = shape.Center.x * shape.Scale.x;
-        var cy = shape.Center.y * shape.Scale.y;
-        var cz = shape.Center.z * shape.Scale.z;
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
 
         var minX = 0f;
         var minY = 0f;
@@ -134,9 +125,6 @@ public class ServerCollisionData
 
         return new ServerCollisionData(
                 shape.Name,
-                type,
-                shape.Layer,
-                shape.LayerName,
                 hasObb,
                 obbCx, obbCy, obbCz,
                 obbHx, obbHy, obbHz,
@@ -150,9 +138,6 @@ public class ServerCollisionData
         var object = new SFSObject();
 
         object.putUtfString("shapeId", shapeId);
-        object.putUtfString("type", shapeType.name());
-        object.putInt("layer", layer);
-        object.putUtfString("layerName", layerName);
         object.putBool("hasObb", hasObb);
 
         if (hasObb)

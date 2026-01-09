@@ -74,8 +74,8 @@ public class AABBCollisionRotateService
         var topY = bottomY + player.height;
         var topZ = bottomZ;
 
-        var localBottom = rotateVectorByQuaternion(bottomX, bottomY, bottomZ, rotation);
-        var localTop = rotateVectorByQuaternion(topX, topY, topZ, rotation);
+        var localBottom = rotateVectorByQuaternionInverse(bottomX, bottomY, bottomZ, rotation);
+        var localTop = rotateVectorByQuaternionInverse(topX, topY, topZ, rotation);
 
         var expand = player.radius;
         var minX = -hx - expand;
@@ -90,11 +90,11 @@ public class AABBCollisionRotateService
                 minX, maxX, minY, maxY, minZ, maxZ);
     }
 
-    public float[] rotateVectorByQuaternion(float vx, float vy, float vz, Quaternion rotation)
+    private float[] rotateVectorByQuaternionInverse(float vx, float vy, float vz, Quaternion rotation)
     {
-        var qx = rotation.x;
-        var qy = rotation.y;
-        var qz = rotation.z;
+        var qx = -rotation.x;
+        var qy = -rotation.y;
+        var qz = -rotation.z;
         var qw = rotation.w;
 
         var lenSqr = qx * qx + qy * qy + qz * qz + qw * qw;
@@ -114,11 +114,11 @@ public class AABBCollisionRotateService
         var tz = 2f * (qx * vy - qy * vx);
 
         return new float[]
-                {
-                        vx + qw * tx + (qy * tz - qz * ty),
-                        vy + qw * ty + (qz * tx - qx * tz),
-                        vz + qw * tz + (qx * ty - qy * tx)
-                };
+        {
+                vx + qw * tx + (qy * tz - qz * ty),
+                vy + qw * ty + (qz * tx - qx * tz),
+                vz + qw * tz + (qx * ty - qy * tx)
+        };
     }
 
     private boolean segmentIntersectsAabb(float ax, float ay, float az, float bx, float by, float bz,

@@ -19,14 +19,17 @@ public class CollisionMapService
     private final AABBCollisionService aabbService;
     private final PlayerCollider playerCollider = new PlayerCollider();
     private final RaycastService raycastService;
+    private final GameExtension gameExtension;
 
     //TODO: SDK Parameters
     private float playerRadius = 0.5f;
     private float playerHeight = 3.5f;
 
-    public CollisionMapService(String path,  GameExtension game)
+    public CollisionMapService(String path, GameExtension game)
     {
         aabbService = new AABBCollisionService(game);
+
+        this.gameExtension = game;
 
         var collisionMapPayload = DeserializeCollisionMap(path);
 
@@ -62,6 +65,7 @@ public class CollisionMapService
 
             if (intersectsShape(shape))
             {
+                gameExtension.trace("Collision Shape " + shape.Name + " is colliding");
                 return true;
             }
         }
