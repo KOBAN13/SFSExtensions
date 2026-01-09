@@ -90,13 +90,13 @@ public class RaycastService
     {
         outHit.clear();
 
-        var hx = shape.Size.x * shape.Scale.x * 0.5f;
-        var hy = shape.Size.y * shape.Scale.y * 0.5f;
-        var hz = shape.Size.z * shape.Scale.z * 0.5f;
+        var hx = shape.Size.x * 0.5f;
+        var hy = shape.Size.y * 0.5f;
+        var hz = shape.Size.z * 0.5f;
 
-        var cx = shape.Center.x * shape.Scale.x;
-        var cy = shape.Center.y * shape.Scale.y;
-        var cz = shape.Center.z * shape.Scale.z;
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
 
         var minX = cx - hx;
         var minY = cy - hy;
@@ -141,9 +141,10 @@ public class RaycastService
     {
         outHit.clear();
 
-        var cx = shape.Center.x * shape.Scale.x;
-        var cy = shape.Center.y * shape.Scale.y;
-        var cz = shape.Center.z * shape.Scale.z;
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
+
         var radius = shape.Radius * shape.Scale.x;
 
         var hitT = intersectRaySphere(cx, cy, cz, radius, maxDistance);
@@ -164,11 +165,12 @@ public class RaycastService
     {
         outHit.clear();
 
-        var cx = shape.Center.x * shape.Scale.x;
-        var cy = shape.Center.y * shape.Scale.y;
-        var cz = shape.Center.z * shape.Scale.z;
-        var radius = shape.Radius * shape.Scale.x;
-        var height = shape.Height * shape.Scale.y;
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
+
+        var radius = shape.Radius;
+        var height = shape.Height;
 
         var hitT = Float.POSITIVE_INFINITY;
 

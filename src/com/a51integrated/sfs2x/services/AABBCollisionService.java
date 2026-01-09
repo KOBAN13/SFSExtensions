@@ -20,9 +20,9 @@ public class AABBCollisionService
 
     public boolean collisionCapsuleWithBox(CollisionShapeData shape, PlayerCollider player)
     {
-        var hx = halfScaled(shape.Size.x, shape.Scale.x);
-        var hy = halfScaled(shape.Size.y, shape.Scale.y);
-        var hz = halfScaled(shape.Size.z, shape.Scale.z);
+        var hx = shape.Size.x * 0.5f;
+        var hy = shape.Size.y * 0.5f;
+        var hz = shape.Size.z * 0.5f;
 
         var lcx = shape.Center.x;
         var lcy = shape.Center.y;
@@ -45,9 +45,9 @@ public class AABBCollisionService
 
     public boolean collisionCapsuleWithSphere(CollisionShapeData shape, PlayerCollider player)
     {
-        var sx = scaled(shape.Center.x, shape.Scale.x);
-        var sy = scaled(shape.Center.y, shape.Scale.y);
-        var sz = scaled(shape.Center.z, shape.Scale.z);
+        var sx = shape.Center.x;
+        var sy = shape.Center.y;
+        var sz = shape.Center.z;
 
         var sphereRadius = scaled(shape.Radius, shape.Scale.x);
 
@@ -66,12 +66,12 @@ public class AABBCollisionService
 
     public boolean collisionCapsuleWithCapsule(CollisionShapeData shape, PlayerCollider player)
     {
-        var cx = scaled(shape.Center.x, shape.Scale.x);
-        var cy = scaled(shape.Center.y, shape.Scale.y);
-        var cz = scaled(shape.Center.z, shape.Scale.z);
+        var cx = shape.Center.x;
+        var cy = shape.Center.y;
+        var cz = shape.Center.z;
 
-        var envRadius = scaled(shape.Radius, shape.Scale.x);
-        var envHeight = scaled(shape.Height, shape.Scale.y);
+        var envRadius = shape.Radius;
+        var envHeight = shape.Height;
 
         var aBottom = player.y;
         var aTop = aBottom + player.height;
@@ -120,11 +120,6 @@ public class AABBCollisionService
     private static float scaled(float value, float scale)
     {
         return value * scale;
-    }
-
-    private static float halfScaled(float value, float scale)
-    {
-        return value * scale * 0.5f;
     }
 
     private static float sqr(float value)

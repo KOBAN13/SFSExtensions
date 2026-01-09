@@ -69,9 +69,9 @@ public class ServerCollisionData
         switch (type)
         {
             case Box:
-                obbHx = shape.Size.x * shape.Scale.x * 0.5f;
-                obbHy = shape.Size.y * shape.Scale.y * 0.5f;
-                obbHz = shape.Size.z * shape.Scale.z * 0.5f;
+                obbHx = shape.Size.x * 0.5f;
+                obbHy = shape.Size.y * 0.5f;
+                obbHz = shape.Size.z * 0.5f;
                 obbCx = cx;
                 obbCy = cy;
                 obbCz = cz;
@@ -112,8 +112,8 @@ public class ServerCollisionData
                 break;
 
             case Capsule:
-                var capsuleRadius = shape.Radius * shape.Scale.x;
-                var capsuleHeight = shape.Height * shape.Scale.y;
+                var capsuleRadius = shape.Radius;
+                var capsuleHeight = shape.Height;
                 minX = cx - capsuleRadius;
                 minY = cy - capsuleRadius;
                 minZ = cz - capsuleRadius;
