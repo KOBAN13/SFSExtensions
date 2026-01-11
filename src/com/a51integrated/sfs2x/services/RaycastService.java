@@ -8,12 +8,15 @@ import java.util.List;
 
 public class RaycastService
 {
+    private static final float AXIS_EPSILON = 1e-6f;
+
     private final List<CollisionShapeData> shapes;
     private final LayerCategoryMapService layerCategoryMapService;
 
     private final GameExtension game;
-    private static final float AXIS_EPSILON = 1e-6f;
+    private final AABBData aabbData = new AABBData();
     private final RaycastShapeData raycastShapeData = new RaycastShapeData();
+    private final AABBCollisionRotateService aabbCollisionRotateService;
     private final SlabRange slabRange = new SlabRange();
 
     public RaycastService(List<CollisionShapeData> shapes, LayerCategoryMapService layerCategoryMapService, GameExtension game)
@@ -21,6 +24,7 @@ public class RaycastService
         this.game = game;
         this.shapes = shapes;
         this.layerCategoryMapService = layerCategoryMapService;
+        aabbCollisionRotateService = new AABBCollisionRotateService(aabbData);
     }
 
     public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, int layerMask)
@@ -98,23 +102,17 @@ public class RaycastService
         var cy = shape.Center.y;
         var cz = shape.Center.z;
 
-        var minX = cx - hx;
-        var minY = cy - hy;
-        var minZ = cz - hz;
-
-        var maxX = cx + hx;
-        var maxY = cy + hy;
-        var maxZ = cz + hz;
+        aabbCollisionRotateService.setAabbFromObb(cx, cy, cz, hx, hy, hz, shape.Rotation);
 
         slabRange.set(0f, maxDistance);
 
-        if (!intersectSlab(minX, maxX, raycastShapeData.ox, raycastShapeData.dx, slabRange))
+        if (!intersectSlab(aabbData.minX, aabbData.maxX, raycastShapeData.ox, raycastShapeData.dx, slabRange))
             return false;
 
-        if (!intersectSlab(minY, maxY, raycastShapeData.oy, raycastShapeData.dy, slabRange))
+        if (!intersectSlab(aabbData.minY, aabbData.maxY, raycastShapeData.oy, raycastShapeData.dy, slabRange))
             return false;
 
-        if (!intersectSlab(minZ, maxZ, raycastShapeData.oz, raycastShapeData.dz, slabRange))
+        if (!intersectSlab(aabbData.minZ, aabbData.maxZ, raycastShapeData.oz, raycastShapeData.dz, slabRange))
             return false;
 
         var tMin = slabRange.tMin;

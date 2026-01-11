@@ -40,8 +40,7 @@ public class CollisionMapService
         raycastService = new RaycastService(shapes, layerCategoryMapService, game);
     }
 
-    public void clear()
-    {
+    public void clear() {
         shapes.clear();
     }
 
@@ -65,7 +64,6 @@ public class CollisionMapService
 
             if (intersectsShape(shape))
             {
-                gameExtension.trace("Collision Shape " + shape.Name + " is colliding");
                 return true;
             }
         }

@@ -117,18 +117,15 @@ public class AABBCollisionService
                 && Math.abs(Math.abs(rotation.w) - 1f) < ROTATION_EPSILON;
     }
 
-    private static float scaled(float value, float scale)
-    {
+    private static float scaled(float value, float scale) {
         return value * scale;
     }
 
-    private static float sqr(float value)
-    {
+    private static float sqr(float value) {
         return value * value;
     }
 
-    private static float clamp(float v, float min, float max)
-    {
+    private static float clamp(float v, float min, float max) {
         return Math.max(min, Math.min(max, v));
     }
 }
