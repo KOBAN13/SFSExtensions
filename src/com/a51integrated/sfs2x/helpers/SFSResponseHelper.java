@@ -24,7 +24,8 @@ public class SFSResponseHelper
     public static final String CREATE_GAME_ROOM = "createGameRoom";
     public static final String PLAYER_JOIN_ROOM = "playerJoinRoom";
     public static final String PLAYER_INPUT = "playerInput";
-    public static final String PLAYER_STATE = "playerState";
+    public static final String PLAYER_CLIENT_STATE = "playerClientState";
+    public static final String PLAYER_SERVER_STATE = "playerServerState";
 
     public static final String COLLISION_DATA = "collisionData";
     public static final String RAYCAST = "raycast";

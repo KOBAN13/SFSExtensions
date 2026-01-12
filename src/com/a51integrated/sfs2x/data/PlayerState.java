@@ -6,7 +6,6 @@ public class PlayerState
 
     public long snapshotId;
     public float serverTime;
-    public float x, y, z;
     public float rotation;
     public float eulerAngleY;
     public float prevX, prevY, prevZ;
@@ -16,6 +15,9 @@ public class PlayerState
     public boolean isRunning;
     public boolean isOnGround;
     public String animationState;
+    public float aimDirectionX, aimDirectionY, aimDirectionZ;
+    public float aimPitch;
+    public float x, y ,z;
 
     public PlayerState(int id)
     {

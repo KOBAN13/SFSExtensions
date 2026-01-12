@@ -48,6 +48,10 @@ public class RoomStateService
             item.putFloat("serverTime", playerState.serverTime);
             item.putFloat("verticalVelocity", playerState.verticalVelocity);
             item.putUtfString("animationState", playerState.animationState);
+            item.putFloat("aimDirectionX", playerState.aimDirectionX);
+            item.putFloat("aimDirectionY", playerState.aimDirectionY);
+            item.putFloat("aimDirectionZ", playerState.aimDirectionZ);
+            item.putFloat("aimPitch",  playerState.aimPitch);
 
             sfsArray.addSFSObject(item);
         }

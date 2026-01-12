@@ -23,11 +23,6 @@ public class PlayerMovementLoop implements Runnable
     private static final float THRESHOLD = 1.5f;
     private static final float THRESHOLD_SQR = THRESHOLD * THRESHOLD;
 
-    private static final float PLAYER_RADIUS = 0.4f;
-    private static final float PLAYER_HEIGHT = 1.8f;
-
-    public static final float Rad2Deg = 57.29578f;
-
     private long snapshotId = 0;
 
     private Vector3f targetDirection = new Vector3f();
@@ -95,8 +90,6 @@ public class PlayerMovementLoop implements Runnable
 
             var isColliding = collisionMapService.isColliding(targetX, baseY, targetZ);
 
-            //game.trace("isColliding " + isColliding);
-
             if (!isColliding)
             {
                 playerState.x = targetX;
@@ -135,6 +128,7 @@ public class PlayerMovementLoop implements Runnable
         }
 
         var packet = roomStateService.toSFSObject();
-        game.send(SFSResponseHelper.PLAYER_STATE, packet, room.getPlayersList());
+        game.send(SFSResponseHelper.PLAYER_SERVER_STATE, packet, room.getPlayersList());
     }
 }
+
