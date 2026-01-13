@@ -1,7 +1,9 @@
 package com.a51integrated.sfs2x.handlers;
 
 import com.a51integrated.sfs2x.GameExtension;
+import com.a51integrated.sfs2x.data.Vector3;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.services.CollisionMapService;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
 import com.smartfoxserver.v2.entities.Room;
@@ -11,6 +13,12 @@ import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
 
 public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
 {
+    private final CollisionMapService collisionMapService;
+
+    public JoinGameRoomServerEventHandler(CollisionMapService collisionMapService) {
+        this.collisionMapService = collisionMapService;
+    }
+
     @Override
     public void handleServerEvent(ISFSEvent event) throws SFSException
     {
@@ -29,6 +37,10 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
         playerState.animationState = "idle";
 
         var result = roomState.toSFSObject();
+
+        collisionMapService.registerPlayerShape(
+                user.getId(),
+                new Vector3(playerState.x, playerState.y, playerState.z));
 
         send(SFSResponseHelper.PLAYER_JOIN_ROOM, result, room.getPlayersList());
     }

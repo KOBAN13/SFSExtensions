@@ -88,7 +88,7 @@ public class PlayerMovementLoop implements Runnable
             var targetX = baseX + dx;
             var targetZ = baseZ + dz;
 
-            var isColliding = collisionMapService.isColliding(targetX, baseY, targetZ);
+            var isColliding = collisionMapService.isColliding(user.getId(), targetX, baseY, targetZ);
 
             if (!isColliding)
             {
@@ -125,6 +125,12 @@ public class PlayerMovementLoop implements Runnable
             {
                 playerState.isOnGround = false;
             }
+
+            collisionMapService.updatePlayerShapeCenter(
+                    playerState.id,
+                    playerState.x,
+                    playerState.y,
+                    playerState.z);
         }
 
         var packet = roomStateService.toSFSObject();

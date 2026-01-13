@@ -8,5 +8,7 @@ public enum ECollisionCategory
     Ground,
     Water,
     UI,
-    Obstacle
+    Obstacle,
+    Player,
+    RemotePlayer
 }

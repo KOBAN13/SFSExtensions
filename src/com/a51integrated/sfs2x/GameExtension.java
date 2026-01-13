@@ -43,7 +43,8 @@ public class GameExtension extends SFSExtension
         addRequestHandler(SFSResponseHelper.PLAYER_CLIENT_STATE, PlayerStateHandler.class);
         addRequestHandler(SFSResponseHelper.RAYCAST, new RaycastHandler(collisionMapService));
         addRequestHandler(SFSResponseHelper.COLLISION_DATA, new CollisionDataHandler(collisionMapService));
-        addEventHandler(SFSEventType.USER_JOIN_ROOM, JoinGameRoomServerEventHandler.class);
+        addEventHandler(SFSEventType.USER_JOIN_ROOM, new JoinGameRoomServerEventHandler(collisionMapService));
+        addEventHandler(SFSEventType.USER_LEAVE_ROOM, new LeaveGameRoomServerEventHandler(collisionMapService));
 
         gameLoop = sfs.getTaskScheduler().scheduleAtFixedRate(
                 new PlayerMovementLoop(this, roomStateService, collisionMapService),

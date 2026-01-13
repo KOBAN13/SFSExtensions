@@ -18,6 +18,8 @@ public class LayerCategoryMapService
         categoryMap.put("Ground", ECollisionCategory.Ground);
         categoryMap.put("Water", ECollisionCategory.Water);
         categoryMap.put("Obstacle", ECollisionCategory.Obstacle);
+        categoryMap.put("Player", ECollisionCategory.Player);
+        categoryMap.put("RemotePlayer", ECollisionCategory.RemotePlayer);
     }
 
     public boolean layerInMask(int unityLayer, int layerMask)
