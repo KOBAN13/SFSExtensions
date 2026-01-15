@@ -93,13 +93,11 @@ public class CollisionMapService
         shape.Center.z = z;
     }
 
-    public void removePlayerShape(int userId)
-    {
+    public void removePlayerShape(int userId) {
         playerShapes.remove(userId);
     }
 
-    public List<CollisionShapeData> getPlayerShapes()
-    {
+    public List<CollisionShapeData> getPlayerShapes() {
         return new ArrayList<>(playerShapes.values());
     }
 
@@ -180,6 +178,7 @@ public class CollisionMapService
         while (iterator.hasNext())
         {
             var shape = iterator.next();
+
             if (shape.LayerCategory == ECollisionCategory.Player)
             {
                 iterator.remove();

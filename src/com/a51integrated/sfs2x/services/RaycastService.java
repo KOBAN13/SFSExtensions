@@ -4,6 +4,9 @@ import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 //TODO: Need refactoring
 public class RaycastService
 {
@@ -17,6 +20,10 @@ public class RaycastService
     private final RaycastShapeData raycastShapeData = new RaycastShapeData();
     private final AABBCollisionRotateService aabbCollisionRotateService;
     private final SlabRange slabRange = new SlabRange();
+    private final RaycastHit bestHit = new RaycastHit();
+    private final RaycastHit closestHit = new RaycastHit();
+
+    private final List<CollisionShapeData> allShapes = new ArrayList<>();
 
     public RaycastService(CollisionMapService collisionMapService, LayerCategoryMapService layerCategoryMapService, GameExtension game)
     {
@@ -28,7 +35,8 @@ public class RaycastService
 
     public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, int layerMask)
     {
-        var bestHit = new RaycastHit();
+        bestHit.clear();
+        allShapes.clear();
 
         if (maxDistance < 0f)
             return bestHit;
@@ -45,33 +53,14 @@ public class RaycastService
                 direction.y * invLen,
                 direction.z * invLen);
 
-        var closestHit = new RaycastHit();
-
         var shapes = collisionMapService.getShapes();
         var playerShapes = collisionMapService.getPlayerShapes();
 
+        allShapes.addAll(shapes);
+        allShapes.addAll(playerShapes);
+
         //TODO: Оптимизировать нет смылса кидать постоянно на каждый обьект рейкаст
-        for (var shape : shapes)
-        {
-            var layerValid = layerCategoryMapService.layerInMask(shape.Layer, layerMask);
-
-            if (!layerValid)
-                continue;
-
-            if (!raycastShape(maxDistance, shape, closestHit))
-                continue;
-
-            game.trace("Shape: " + shape.Name);
-
-            if (!bestHit.getHit() || closestHit.getDistance() < bestHit.getDistance())
-            {
-                bestHit.copyFrom(closestHit);
-                game.trace("Found: " + shape.Name);
-            }
-        }
-
-        //TODO: Оптимизировать нет смылса проверять коллизию с каждым обьектом на сцене
-        for (var shape : playerShapes)
+        for (var shape : allShapes)
         {
             var layerValid = layerCategoryMapService.layerInMask(shape.Layer, layerMask);
 

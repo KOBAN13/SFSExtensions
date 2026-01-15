@@ -19,6 +19,7 @@ public class CollisionShapeData
     public CollisionShapeData copy()
     {
         var copy = new CollisionShapeData();
+
         copy.Name = Name;
         copy.Type = Type;
         copy.Layer = Layer;

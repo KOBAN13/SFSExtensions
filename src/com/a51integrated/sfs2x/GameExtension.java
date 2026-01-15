@@ -2,6 +2,7 @@ package com.a51integrated.sfs2x;
 
 import com.a51integrated.sfs2x.handlers.*;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
+import com.a51integrated.sfs2x.loop.CollisionDataLoop;
 import com.a51integrated.sfs2x.loop.PlayerMovementLoop;
 import com.a51integrated.sfs2x.services.CollisionMapService;
 import com.a51integrated.sfs2x.services.RoomStateService;
@@ -16,6 +17,7 @@ public class GameExtension extends SFSExtension
     private RoomStateService roomStateService;
     private CollisionMapService collisionMapService;
     private ScheduledFuture<?> gameLoop;
+    private ScheduledFuture<?> colliderDebug;
 
     public RoomStateService getRoomStateService()
     {
@@ -42,7 +44,6 @@ public class GameExtension extends SFSExtension
         addRequestHandler(SFSResponseHelper.PLAYER_INPUT, PlayerInputHandler.class);
         addRequestHandler(SFSResponseHelper.PLAYER_CLIENT_STATE, PlayerStateHandler.class);
         addRequestHandler(SFSResponseHelper.RAYCAST, new RaycastHandler(collisionMapService));
-        addRequestHandler(SFSResponseHelper.COLLISION_DATA, new CollisionDataHandler(collisionMapService));
         addEventHandler(SFSEventType.USER_JOIN_ROOM, new JoinGameRoomServerEventHandler(collisionMapService));
         addEventHandler(SFSEventType.USER_LEAVE_ROOM, new LeaveGameRoomServerEventHandler(collisionMapService));
 
@@ -50,6 +51,13 @@ public class GameExtension extends SFSExtension
                 new PlayerMovementLoop(this, roomStateService, collisionMapService),
                 0,
                 33,
+                TimeUnit.MILLISECONDS
+        );
+
+        colliderDebug = sfs.getTaskScheduler().scheduleAtFixedRate(
+                new CollisionDataLoop(this, collisionMapService, roomStateService),
+                0,
+                50,
                 TimeUnit.MILLISECONDS
         );
     }
