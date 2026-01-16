@@ -3,7 +3,6 @@ package com.a51integrated.sfs2x.services;
 import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.CollisionShapeData;
-import com.a51integrated.sfs2x.data.ECollisionShapeType;
 import com.a51integrated.sfs2x.data.ECollisionCategory;
 import com.a51integrated.sfs2x.data.PlayerCollider;
 import com.a51integrated.sfs2x.data.Vector3;

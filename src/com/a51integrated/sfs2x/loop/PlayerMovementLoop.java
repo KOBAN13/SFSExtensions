@@ -4,6 +4,7 @@ import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.CollisionMapService;
 import com.a51integrated.sfs2x.services.RoomStateService;
+import com.a51integrated.sfs2x.services.SnapshotsHistoryService;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -13,6 +14,7 @@ public class PlayerMovementLoop implements Runnable
     private final GameExtension game;
     private final RoomStateService roomStateService;
     private final CollisionMapService collisionMapService;
+    private final SnapshotsHistoryService snapshotsHistoryService = new SnapshotsHistoryService();
 
     private static final float GRAVITY = -9.81f;
     private static final float JUMP_VELOCITY = 8f;
@@ -45,6 +47,7 @@ public class PlayerMovementLoop implements Runnable
         for (var user : room.getPlayersList())
         {
             var playerState = roomStateService.get(user);
+            var userId = user.getId();
 
             playerState.serverTime = serverTime;
             playerState.snapshotId = snapshotId;
@@ -88,7 +91,7 @@ public class PlayerMovementLoop implements Runnable
             var targetX = baseX + dx;
             var targetZ = baseZ + dz;
 
-            var isColliding = collisionMapService.isColliding(user.getId(), targetX, baseY, targetZ);
+            var isColliding = collisionMapService.isColliding(userId, targetX, baseY, targetZ);
 
             if (!isColliding)
             {
@@ -131,6 +134,9 @@ public class PlayerMovementLoop implements Runnable
                     playerState.x,
                     playerState.y,
                     playerState.z);
+
+            snapshotsHistoryService.ensurePlayer(userId);
+            snapshotsHistoryService.record(userId, playerState);
         }
 
         var packet = roomStateService.toSFSObject();

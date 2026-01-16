@@ -38,6 +38,8 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
 
         var result = roomState.toSFSObject();
 
+        trace("Register player: " + user.getId());
+
         collisionMapService.registerPlayerShape(
                 user.getId(),
                 new Vector3(playerState.x, playerState.y, playerState.z));
