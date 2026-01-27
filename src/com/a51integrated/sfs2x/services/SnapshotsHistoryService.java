@@ -22,18 +22,15 @@ public class SnapshotsHistoryService
         slot.copyFrom(playerState);
     }
 
-    public PlayerState getRecord(int userId, long snapshotId)
-    {
+    public PlayerState getRecord(int userId, long snapshotId) {
         return history.get(userId).poll();
     }
 
-    public void ensurePlayer(int userId)
-    {
+    public void ensurePlayer(int userId) {
         history.computeIfAbsent(userId, k -> new RingBuffer<>(maxSizeTick));
     }
 
-    public void removePlayer(int userId)
-    {
+    public void removePlayer(int userId) {
         history.remove(userId);
     }
 }

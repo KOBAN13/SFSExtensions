@@ -44,6 +44,6 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
                 user.getId(),
                 new Vector3(playerState.x, playerState.y, playerState.z));
 
-        send(SFSResponseHelper.PLAYER_JOIN_ROOM, result, room.getPlayersList());
+        send(SFSResponseHelper.PLAYER_JOIN_GAME_ROOM, result, room.getPlayersList());
     }
 }

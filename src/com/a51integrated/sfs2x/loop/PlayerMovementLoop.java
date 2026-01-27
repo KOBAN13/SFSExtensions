@@ -14,7 +14,7 @@ public class PlayerMovementLoop implements Runnable
     private final GameExtension game;
     private final RoomStateService roomStateService;
     private final CollisionMapService collisionMapService;
-    private final SnapshotsHistoryService snapshotsHistoryService = new SnapshotsHistoryService();
+    private final SnapshotsHistoryService snapshotsHistoryService;
 
     private static final float GRAVITY = -9.81f;
     private static final float JUMP_VELOCITY = 8f;
@@ -29,11 +29,17 @@ public class PlayerMovementLoop implements Runnable
 
     private Vector3f targetDirection = new Vector3f();
 
-    public PlayerMovementLoop(GameExtension game, RoomStateService roomStateService, CollisionMapService collisionMapService)
+    public PlayerMovementLoop(
+            GameExtension game,
+            RoomStateService roomStateService,
+            CollisionMapService collisionMapService,
+            SnapshotsHistoryService snapshotsHistoryService
+    )
     {
         this.game = game;
         this.roomStateService = roomStateService;
         this.collisionMapService = collisionMapService;
+        this.snapshotsHistoryService = snapshotsHistoryService;
     }
 
     @Override
@@ -42,7 +48,7 @@ public class PlayerMovementLoop implements Runnable
         var room = roomStateService.getRoom();
 
         snapshotId++;
-        float serverTime = snapshotId * DELTA_TIME;
+        var serverTime = snapshotId * DELTA_TIME;
 
         for (var user : room.getPlayersList())
         {

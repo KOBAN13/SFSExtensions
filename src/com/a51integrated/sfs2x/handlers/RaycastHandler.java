@@ -3,6 +3,8 @@ package com.a51integrated.sfs2x.handlers;
 import com.a51integrated.sfs2x.data.RaycastHit;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.CollisionMapService;
+import com.a51integrated.sfs2x.services.RoomStateService;
+import com.a51integrated.sfs2x.services.SnapshotsHistoryService;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;
@@ -12,10 +14,17 @@ import org.joml.Vector3f;
 public class RaycastHandler extends BaseClientRequestHandler
 {
     private final CollisionMapService collisionMapService;
+    private final RoomStateService roomStateService;
+    private final SnapshotsHistoryService snapshotsHistoryService;
     private final float MAX_DISTANCE = 200f;
 
-    public RaycastHandler(CollisionMapService collisionMapService) {
+    public RaycastHandler(
+            CollisionMapService collisionMapService,
+            RoomStateService roomStateService,
+            SnapshotsHistoryService snapshotsHistoryService) {
         this.collisionMapService = collisionMapService;
+        this.roomStateService = roomStateService;
+        this.snapshotsHistoryService = snapshotsHistoryService;
     }
 
     @Override
@@ -25,6 +34,10 @@ public class RaycastHandler extends BaseClientRequestHandler
 
         var originData = object.getSFSArray("originVector");
         var directionData = object.getSFSArray("directionVector");
+        var snapshotId = object.getLong("snapshotId");
+        var playerState = roomStateService.get(sender);
+
+        trace("Snapshot shoot: " + snapshotId + " Snapshot in server " + playerState.snapshotId);
 
         if (originData.size() < 3 || directionData.size() < 3)
         {
