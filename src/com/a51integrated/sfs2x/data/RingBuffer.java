@@ -100,6 +100,22 @@ public final class RingBuffer<T> implements Iterable<T> {
         return v;
     }
 
+    public T getAt(int index) {
+        @SuppressWarnings("unchecked")
+        T v = (T) data[index];
+        return v;
+    }
+
+    public T getOrCreateAt(int index, java.util.function.Supplier<T> supplier) {
+        @SuppressWarnings("unchecked")
+        T v = (T) data[index];
+        if (v == null) {
+            v = supplier.get();
+            data[index] = v;
+        }
+        return v;
+    }
+
     public void clear() {
         for (int i = 0; i < size; i++) {
             data[(head + i) % data.length] = null;

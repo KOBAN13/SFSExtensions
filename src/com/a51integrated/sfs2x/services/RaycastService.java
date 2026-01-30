@@ -2,7 +2,7 @@ package com.a51integrated.sfs2x.services;
 
 import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
-import org.joml.Vector3f;
+import org.joml.Math;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +33,30 @@ public class RaycastService
         aabbCollisionRotateService = new AABBCollisionRotateService(aabbData);
     }
 
-    public RaycastHit raycast(Vector3f origin, Vector3f direction, float maxDistance, int layerMask)
+    public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, Ray ray)
+    {
+
+    }
+
+    public RaycastHit raycast(Ray ray)
     {
         bestHit.clear();
         allShapes.clear();
 
-        if (maxDistance < 0f)
+        if (ray.maxDistance < 0f)
             return bestHit;
 
-        var len = direction.length();
+        var len = ray.direction.length();
 
         if (len < AXIS_EPSILON)
             return bestHit;
 
         var invLen = 1f / len;
 
-        raycastShapeData.set(origin.x, origin.y, origin.z,
-                direction.x * invLen,
-                direction.y * invLen,
-                direction.z * invLen);
+        raycastShapeData.set(ray.origin.x, ray.origin.y, ray.origin.z,
+                ray.direction.x * invLen,
+                ray.direction.y * invLen,
+                ray.direction.z * invLen);
 
         var shapes = collisionMapService.getShapes();
         var playerShapes = collisionMapService.getPlayerShapes();
@@ -62,12 +67,12 @@ public class RaycastService
         //TODO: Оптимизировать нет смылса кидать постоянно на каждый обьект рейкаст
         for (var shape : allShapes)
         {
-            var layerValid = layerCategoryMapService.layerInMask(shape.Layer, layerMask);
+            var layerValid = layerCategoryMapService.layerInMask(shape.Layer, ray.layerMask);
 
             if (!layerValid)
                 continue;
 
-            if (!raycastShape(maxDistance, shape, closestHit))
+            if (!raycastShape(ray.maxDistance, shape, closestHit))
                 continue;
 
             game.trace("Shape: " + shape.Name);

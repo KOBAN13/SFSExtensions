@@ -1,5 +1,6 @@
 package com.a51integrated.sfs2x.handlers;
 
+import com.a51integrated.sfs2x.data.Ray;
 import com.a51integrated.sfs2x.data.RaycastHit;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.CollisionMapService;
@@ -16,6 +17,7 @@ public class RaycastHandler extends BaseClientRequestHandler
     private final CollisionMapService collisionMapService;
     private final RoomStateService roomStateService;
     private final SnapshotsHistoryService snapshotsHistoryService;
+    private final Ray ray = new Ray();
     private final float MAX_DISTANCE = 200f;
 
     public RaycastHandler(
@@ -67,7 +69,14 @@ public class RaycastHandler extends BaseClientRequestHandler
         var originVector = new Vector3f(ox, oy, oz);
         var directionVector = new Vector3f(dx, dy, dz);
 
-        var raycastHit = raycastService.raycast(originVector, directionVector, distance, layerMask);
+        ray.clear();
+
+        ray.origin = originVector;
+        ray.direction = directionVector;
+        ray.layerMask = layerMask;
+        ray.maxDistance = distance;
+
+        var raycastHit = raycastService.handleShot(sender.getId(), snapshotId, ray);
 
         sendSuccess(result, raycastHit, sender);
     }

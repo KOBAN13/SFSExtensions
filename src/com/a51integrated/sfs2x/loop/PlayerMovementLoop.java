@@ -142,7 +142,7 @@ public class PlayerMovementLoop implements Runnable
                     playerState.z);
 
             snapshotsHistoryService.ensurePlayer(userId);
-            snapshotsHistoryService.record(userId, playerState);
+            snapshotsHistoryService.record(userId, playerState, snapshotId);
         }
 
         var packet = roomStateService.toSFSObject();

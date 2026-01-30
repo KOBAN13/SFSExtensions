@@ -14,12 +14,21 @@ public class RewindSnapshotService {
         this.snapshotsHistoryService = snapshotsHistoryService;
     }
 
-    public PlayerState getPlayerState(int playerId, int snapshotId, int snapshotNowId)
+    public PlayerState getPlayerState(int playerId, int clientSnapshotId, int serverSnapshotId, int clientAlpha)
     {
-        var maxRewindSnapshots = MAX_REWIND_MS / snapshotDeltaMs;
-        var rewindId = Math.clamp(snapshotId, snapshotNowId - maxRewindSnapshots, snapshotNowId);
+        var baseId = clampBaseId(clientSnapshotId, serverSnapshotId, 60);
+        var time = alpha01(clientAlpha);
+    }
 
-        var playerStateFirst = snapshotsHistoryService.getRecord(playerId, rewindId);
-        var playerStateSecond = snapshotsHistoryService.getRecord(playerId, rewindId + 1);
+
+    private long clampBaseId(long clientBaseId, long nowId, int maxSizeTick) {
+        var minId = nowId - (maxSizeTick - 2);
+
+        return Math.clamp(clientBaseId,  minId, nowId - 1);
+    }
+
+    private float alpha01(int shotAlpha) {
+        var alpha = Math.max(0, Math.min(255, shotAlpha));
+        return alpha / 255.0f;
     }
 }
