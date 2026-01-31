@@ -37,6 +37,7 @@ public class RaycastHandler extends BaseClientRequestHandler
         var originData = object.getSFSArray("originVector");
         var directionData = object.getSFSArray("directionVector");
         var snapshotId = object.getLong("snapshotId");
+        var shotAlpha = object.getInt("shotAlpha");
         var playerState = roomStateService.get(sender);
 
         trace("Snapshot shoot: " + snapshotId + " Snapshot in server " + playerState.snapshotId);
@@ -76,7 +77,7 @@ public class RaycastHandler extends BaseClientRequestHandler
         ray.layerMask = layerMask;
         ray.maxDistance = distance;
 
-        var raycastHit = raycastService.handleShot(sender.getId(), snapshotId, ray);
+        var raycastHit = raycastService.handleShot(sender.getId(), snapshotId, playerState.snapshotId, shotAlpha, ray);
 
         sendSuccess(result, raycastHit, sender);
     }

@@ -1,6 +1,6 @@
 package com.a51integrated.sfs2x.handlers;
 
-import com.a51integrated.sfs2x.data.PlayerState;
+import com.a51integrated.sfs2x.data.InterpolatedState;
 import com.a51integrated.sfs2x.services.SnapshotsHistoryService;
 import org.joml.Math;
 
@@ -10,14 +10,22 @@ public class RewindSnapshotService {
     private final int MAX_REWIND_MS = 400;
     private int snapshotDeltaMs = 50;
 
+    private final InterpolatedState interpolatedState = new InterpolatedState();
+
     public RewindSnapshotService(SnapshotsHistoryService snapshotsHistoryService) {
         this.snapshotsHistoryService = snapshotsHistoryService;
     }
 
-    public PlayerState getPlayerState(int playerId, int clientSnapshotId, int serverSnapshotId, int clientAlpha)
+    public InterpolatedState getInterpolatePlayerState(int userId, long clientSnapshotId, long serverSnapshotId, int clientAlpha)
     {
+        interpolatedState.clear();
+
         var baseId = clampBaseId(clientSnapshotId, serverSnapshotId, 60);
         var time = alpha01(clientAlpha);
+        var pair = snapshotsHistoryService.getPair(userId, baseId);
+
+        interpolatedState.setLerp(pair.playerStateFirst, pair.playerStateSecond, time);
+        return interpolatedState;
     }
 
 

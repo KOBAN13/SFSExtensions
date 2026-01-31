@@ -18,6 +18,7 @@ public class GameExtension extends SFSExtension
     private RoomStateService roomStateService;
     private CollisionMapService collisionMapService;
     private final SnapshotsHistoryService snapshotsHistoryService = new SnapshotsHistoryService();
+    private final RewindSnapshotService rewindSnapshotService = new RewindSnapshotService(snapshotsHistoryService);
     private ScheduledFuture<?> gameLoop;
     private ScheduledFuture<?> colliderDebug;
 
@@ -37,7 +38,7 @@ public class GameExtension extends SFSExtension
 
         var path = getConfigProperties().getProperty("collision.map.path");
 
-        collisionMapService = new CollisionMapService(path, this);
+        collisionMapService = new CollisionMapService(path, this, rewindSnapshotService);
 
         var sfs = SmartFoxServer.getInstance();
 
@@ -57,7 +58,7 @@ public class GameExtension extends SFSExtension
         colliderDebug = sfs.getTaskScheduler().scheduleAtFixedRate(
                 new CollisionDataLoop(this, collisionMapService, roomStateService),
                 0,
-                50,
+                33,
                 TimeUnit.MILLISECONDS
         );
     }

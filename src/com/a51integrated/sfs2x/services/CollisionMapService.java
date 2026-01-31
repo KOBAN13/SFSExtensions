@@ -6,6 +6,7 @@ import com.a51integrated.sfs2x.data.CollisionShapeData;
 import com.a51integrated.sfs2x.data.ECollisionCategory;
 import com.a51integrated.sfs2x.data.PlayerCollider;
 import com.a51integrated.sfs2x.data.Vector3;
+import com.a51integrated.sfs2x.handlers.RewindSnapshotService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -24,17 +25,23 @@ public class CollisionMapService
     private final AABBCollisionService aabbService;
     private final PlayerCollider playerCollider = new PlayerCollider();
     private final RaycastService raycastService;
+    private final RewindSnapshotService rewindSnapshotService;
     private final GameExtension gameExtension;
 
     //TODO: SDK Parameters
     private final float playerRadius;
     private final float playerHeight;
 
-    public CollisionMapService(String path, GameExtension game)
+    public CollisionMapService(
+            String path,
+            GameExtension game,
+            RewindSnapshotService rewindSnapshotService
+    )
     {
         aabbService = new AABBCollisionService(game);
 
         this.gameExtension = game;
+        this.rewindSnapshotService = rewindSnapshotService;
 
         var collisionMapPayload = DeserializeCollisionMap(path);
 
@@ -46,7 +53,7 @@ public class CollisionMapService
         playerRadius = playerShapeTemplate.Radius;
         playerHeight = playerShapeTemplate.Height;
 
-        raycastService = new RaycastService(this, layerCategoryMapService, game);
+        raycastService = new RaycastService(this, layerCategoryMapService, rewindSnapshotService, game);
     }
 
     public void clear() {

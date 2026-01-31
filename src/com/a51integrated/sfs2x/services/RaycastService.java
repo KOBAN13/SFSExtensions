@@ -2,6 +2,7 @@ package com.a51integrated.sfs2x.services;
 
 import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
+import com.a51integrated.sfs2x.handlers.RewindSnapshotService;
 import org.joml.Math;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class RaycastService
 
     private final CollisionMapService collisionMapService;
     private final LayerCategoryMapService layerCategoryMapService;
+    private final RewindSnapshotService rewindSnapshotService;
 
     private final GameExtension game;
     private final AABBData aabbData = new AABBData();
@@ -25,21 +27,40 @@ public class RaycastService
 
     private final List<CollisionShapeData> allShapes = new ArrayList<>();
 
-    public RaycastService(CollisionMapService collisionMapService, LayerCategoryMapService layerCategoryMapService, GameExtension game)
+    public RaycastService(
+            CollisionMapService collisionMapService,
+            LayerCategoryMapService layerCategoryMapService,
+            RewindSnapshotService rewindSnapshotService,
+            GameExtension game
+    )
     {
         this.collisionMapService = collisionMapService;
+        this.rewindSnapshotService = rewindSnapshotService;
         this.game = game;
         this.layerCategoryMapService = layerCategoryMapService;
         aabbCollisionRotateService = new AABBCollisionRotateService(aabbData);
     }
 
-    public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, Ray ray)
+    public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha, Ray ray)
     {
+        var interpolate = rewindSnapshotService
+                .getInterpolatePlayerState(shooterId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
 
+        return raycastInterpolateObjects(shooterId,  ray, interpolate);
     }
 
-    public RaycastHit raycast(Ray ray)
-    {
+    private RaycastHit raycastInterpolateObjects(int shooterId, Ray ray, InterpolatedState interpolatedState) {
+
+        collisionMapService.updatePlayerShapeCenter(
+                shooterId,
+                interpolatedState.pos.x,
+                interpolatedState.pos.y,
+                interpolatedState.pos.z);
+
+        return raycast(ray);
+    }
+
+    public RaycastHit raycast(Ray ray) {
         bestHit.clear();
         allShapes.clear();
 
