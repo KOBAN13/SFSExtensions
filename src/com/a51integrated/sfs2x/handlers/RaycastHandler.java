@@ -37,10 +37,10 @@ public class RaycastHandler extends BaseClientRequestHandler
         var originData = object.getSFSArray("originVector");
         var directionData = object.getSFSArray("directionVector");
         var snapshotId = object.getLong("snapshotId");
-        var shotAlpha = object.getInt("shotAlpha");
+        var shotAlpha = object.getByte("shotAlpha") & 0xFF;
         var playerState = roomStateService.get(sender);
 
-        trace("Snapshot shoot: " + snapshotId + " Snapshot in server " + playerState.snapshotId);
+        trace("Snapshot shoot: " + snapshotId + " Snapshot in server " + playerState.snapshotId + " ClientAlpha: " + shotAlpha);
 
         if (originData.size() < 3 || directionData.size() < 3)
         {

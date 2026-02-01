@@ -46,16 +46,18 @@ public class RaycastService
         var interpolate = rewindSnapshotService
                 .getInterpolatePlayerState(shooterId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
 
-        return raycastInterpolateObjects(shooterId,  ray, interpolate);
+        var raycast = raycastInterpolateObjects(shooterId,  ray, interpolate);
+        interpolate.clear();
+        return raycast;
     }
 
     private RaycastHit raycastInterpolateObjects(int shooterId, Ray ray, InterpolatedState interpolatedState) {
 
         collisionMapService.updatePlayerShapeCenter(
                 shooterId,
-                interpolatedState.pos.x,
-                interpolatedState.pos.y,
-                interpolatedState.pos.z);
+                interpolatedState.interpolatedPosition.x,
+                interpolatedState.interpolatedPosition.y,
+                interpolatedState.interpolatedPosition.z);
 
         return raycast(ray);
     }

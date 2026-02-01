@@ -18,7 +18,7 @@ public class GameExtension extends SFSExtension
     private RoomStateService roomStateService;
     private CollisionMapService collisionMapService;
     private final SnapshotsHistoryService snapshotsHistoryService = new SnapshotsHistoryService();
-    private final RewindSnapshotService rewindSnapshotService = new RewindSnapshotService(snapshotsHistoryService);
+    private final RewindSnapshotService rewindSnapshotService = new RewindSnapshotService(snapshotsHistoryService, this);
     private ScheduledFuture<?> gameLoop;
     private ScheduledFuture<?> colliderDebug;
 
