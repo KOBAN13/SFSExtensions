@@ -107,6 +107,11 @@ public class CollisionMapService
         return new ArrayList<>(playerShapes.values());
     }
 
+    public Iterable<Map.Entry<Integer, CollisionShapeData>> getPlayerShapeEntries()
+    {
+        return playerShapes.entrySet();
+    }
+
     public boolean isColliding(int userId, float px, float py, float pz)
     {
         playerCollider.set(px, py, pz, playerRadius, playerHeight);

@@ -26,6 +26,8 @@ public class RaycastService
     private final RaycastHit closestHit = new RaycastHit();
 
     private final List<CollisionShapeData> allShapes = new ArrayList<>();
+    private final List<RewindEntry> rewindEntries = new ArrayList<>();
+    private int rewindEntriesCount = 0;
 
     public RaycastService(
             CollisionMapService collisionMapService,
@@ -43,23 +45,77 @@ public class RaycastService
 
     public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha, Ray ray)
     {
-        var interpolate = rewindSnapshotService
-                .getInterpolatePlayerState(shooterId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
+        rewindPlayerShapes(shooterId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
 
-        var raycast = raycastInterpolateObjects(shooterId,  ray, interpolate);
-        interpolate.clear();
-        return raycast;
+        try
+        {
+            return raycast(ray);
+        }
+        finally
+        {
+            restorePlayerShapes();
+        }
     }
 
-    private RaycastHit raycastInterpolateObjects(int shooterId, Ray ray, InterpolatedState interpolatedState) {
+    private void rewindPlayerShapes(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha)
+    {
+        rewindEntriesCount = 0;
 
-        collisionMapService.updatePlayerShapeCenter(
-                shooterId,
-                interpolatedState.interpolatedPosition.x,
-                interpolatedState.interpolatedPosition.y,
-                interpolatedState.interpolatedPosition.z);
+        for (var entry : collisionMapService.getPlayerShapeEntries())
+        {
+            var userId = entry.getKey();
 
-        return raycast(ray);
+            if (userId == shooterId)
+                continue;
+
+            var interpolatedState = rewindSnapshotService
+                    .getInterpolatePlayerState(userId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
+
+            if (interpolatedState == null)
+                continue;
+
+            var shape = entry.getValue();
+            var center = shape.Center;
+
+            var rewindEntry = ensureRewindEntry(rewindEntriesCount++);
+            rewindEntry.userId = userId;
+
+            if (center == null)
+            {
+                rewindEntry.x = 0f;
+                rewindEntry.y = 0f;
+                rewindEntry.z = 0f;
+            }
+            else
+            {
+                rewindEntry.x = center.x;
+                rewindEntry.y = center.y;
+                rewindEntry.z = center.z;
+            }
+
+            collisionMapService.updatePlayerShapeCenter(
+                    userId,
+                    interpolatedState.interpolatedPosition.x,
+                    interpolatedState.interpolatedPosition.y,
+                    interpolatedState.interpolatedPosition.z);
+        }
+    }
+
+    private void restorePlayerShapes()
+    {
+        for (var i = 0; i < rewindEntriesCount; i++)
+        {
+            var entry = rewindEntries.get(i);
+            collisionMapService.updatePlayerShapeCenter(entry.userId, entry.x, entry.y, entry.z);
+        }
+    }
+
+    private RewindEntry ensureRewindEntry(int index)
+    {
+        if (index >= rewindEntries.size())
+            rewindEntries.add(new RewindEntry());
+
+        return rewindEntries.get(index);
     }
 
     public RaycastHit raycast(Ray ray) {
@@ -352,5 +408,13 @@ public class RaycastService
             this.tMin = tMin;
             this.tMax = tMax;
         }
+    }
+
+    private static final class RewindEntry
+    {
+        private int userId;
+        private float x;
+        private float y;
+        private float z;
     }
 }

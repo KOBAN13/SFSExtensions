@@ -27,6 +27,9 @@ public class RewindSnapshotService {
         var time = Math.clamp(0, 1, alpha01(clientAlpha));
         var pair = snapshotsHistoryService.getPair(userId, baseId);
 
+        if (pair == null || pair.playerStateFirst == null || pair.playerStateSecond == null)
+            return null;
+
         gameExtension.trace("BaseId: " + baseId + " Time: " + time + " ClientAlpha: " + clientAlpha + " Pair: " + pair.playerStateFirst.snapshotId + " " + pair.playerStateSecond.snapshotId);
 
         interpolatedState.setLerp(pair.playerStateFirst, pair.playerStateSecond, time);
