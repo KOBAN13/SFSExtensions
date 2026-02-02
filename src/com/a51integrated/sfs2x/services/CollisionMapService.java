@@ -25,7 +25,6 @@ public class CollisionMapService
     private final AABBCollisionService aabbService;
     private final PlayerCollider playerCollider = new PlayerCollider();
     private final RaycastService raycastService;
-    private final RewindSnapshotService rewindSnapshotService;
     private final GameExtension gameExtension;
 
     //TODO: SDK Parameters
@@ -41,7 +40,6 @@ public class CollisionMapService
         aabbService = new AABBCollisionService(game);
 
         this.gameExtension = game;
-        this.rewindSnapshotService = rewindSnapshotService;
 
         var collisionMapPayload = DeserializeCollisionMap(path);
 
@@ -69,16 +67,12 @@ public class CollisionMapService
         return shapes;
     }
 
-    public CollisionShapeData registerPlayerShape(int userId, Vector3 center)
+    public void registerPlayerShape(int userId, Vector3 center)
     {
-        if (playerShapeTemplate == null)
-            return null;
-
         var shape = playerShapeTemplate.copy();
         shape.Name = buildPlayerShapeName(userId);
         shape.Center = new Vector3(center.x, center.y, center.z);
         playerShapes.put(userId, shape);
-        return shape;
     }
 
     public void updatePlayerShapeCenter(int userId, float x, float y, float z)

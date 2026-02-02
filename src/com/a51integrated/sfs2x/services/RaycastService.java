@@ -4,6 +4,7 @@ import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
 import com.a51integrated.sfs2x.handlers.RewindSnapshotService;
 import org.joml.Math;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,6 @@ public class RaycastService
     private final RaycastHit closestHit = new RaycastHit();
 
     private final List<CollisionShapeData> allShapes = new ArrayList<>();
-    private final List<RewindEntry> rewindEntries = new ArrayList<>();
-    private int rewindEntriesCount = 0;
 
     public RaycastService(
             CollisionMapService collisionMapService,
@@ -45,82 +44,69 @@ public class RaycastService
 
     public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha, Ray ray)
     {
-        rewindPlayerShapes(shooterId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
+        game.trace(
+                "handleShot start: shooterId=" + shooterId
+                        + " clientShotSnapshotId=" + clientShotSnapshotId
+                        + " serverSnapshotId=" + serverSnapshotId
+                        + " clientAlpha=" + clientAlpha);
+        game.trace(
+                "handleShot ray: origin=(" + ray.origin.x + "," + ray.origin.y + "," + ray.origin.z + ")"
+                        + " direction=(" + ray.direction.x + "," + ray.direction.y + "," + ray.direction.z + ")"
+                        + " maxDistance=" + ray.maxDistance
+                        + " layerMask=" + ray.layerMask);
 
-        try
-        {
-            return raycast(ray);
-        }
-        finally
-        {
-            restorePlayerShapes();
-        }
-    }
+        allShapes.clear();
+        allShapes.addAll(collisionMapService.getShapes());
 
-    private void rewindPlayerShapes(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha)
-    {
-        rewindEntriesCount = 0;
+        Vector3f a = new  Vector3f();
 
         for (var entry : collisionMapService.getPlayerShapeEntries())
         {
             var userId = entry.getKey();
 
             if (userId == shooterId)
+            {
+                game.trace("handleShot skip shooter: userId=" + userId);
                 continue;
+            }
 
             var interpolatedState = rewindSnapshotService
                     .getInterpolatePlayerState(userId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
 
-            if (interpolatedState == null)
-                continue;
+            var shapeCopy = entry.getValue().copy();
+            var center = shapeCopy.Center;
+            var position = interpolatedState.interpolatedPosition;
 
-            var shape = entry.getValue();
-            var center = shape.Center;
+            center.x = position.x;
+            center.y = position.y;
+            center.z = position.z;
 
-            var rewindEntry = ensureRewindEntry(rewindEntriesCount++);
-            rewindEntry.userId = userId;
+            a.set(position.x, position.y, position.z);
 
-            if (center == null)
-            {
-                rewindEntry.x = 0f;
-                rewindEntry.y = 0f;
-                rewindEntry.z = 0f;
-            }
-            else
-            {
-                rewindEntry.x = center.x;
-                rewindEntry.y = center.y;
-                rewindEntry.z = center.z;
-            }
+            allShapes.add(shapeCopy);
 
-            collisionMapService.updatePlayerShapeCenter(
-                    userId,
-                    interpolatedState.interpolatedPosition.x,
-                    interpolatedState.interpolatedPosition.y,
-                    interpolatedState.interpolatedPosition.z);
+            game.trace(
+                    "handleShot copy: userId=" + userId
+                            + " to=(" + position.x + "," + position.y + "," + position.z + ")");
         }
+
+        game.trace("handleShot shapes: total=" + allShapes.size());
+
+        var hit = raycast(ray, allShapes);
+
+        hit.velocity.set(a.x, a.y, a.z);
+
+        game.trace(
+                "handleShot raycast: hit=" + hit.getHit()
+                        + " distance=" + hit.getDistance()
+                        + " point=(" + hit.getPoint().x + "," + hit.getPoint().y + "," + hit.getPoint().z + ")");
+        game.trace("handleShot end");
+        return hit;
     }
 
-    private void restorePlayerShapes()
+    private RaycastHit raycast(Ray ray, List<CollisionShapeData> shapes)
     {
-        for (var i = 0; i < rewindEntriesCount; i++)
-        {
-            var entry = rewindEntries.get(i);
-            collisionMapService.updatePlayerShapeCenter(entry.userId, entry.x, entry.y, entry.z);
-        }
-    }
-
-    private RewindEntry ensureRewindEntry(int index)
-    {
-        if (index >= rewindEntries.size())
-            rewindEntries.add(new RewindEntry());
-
-        return rewindEntries.get(index);
-    }
-
-    public RaycastHit raycast(Ray ray) {
         bestHit.clear();
-        allShapes.clear();
 
         if (ray.maxDistance < 0f)
             return bestHit;
@@ -137,14 +123,8 @@ public class RaycastService
                 ray.direction.y * invLen,
                 ray.direction.z * invLen);
 
-        var shapes = collisionMapService.getShapes();
-        var playerShapes = collisionMapService.getPlayerShapes();
-
-        allShapes.addAll(shapes);
-        allShapes.addAll(playerShapes);
-
         //TODO: Оптимизировать нет смылса кидать постоянно на каждый обьект рейкаст
-        for (var shape : allShapes)
+        for (var shape : shapes)
         {
             var layerValid = layerCategoryMapService.layerInMask(shape.Layer, ray.layerMask);
 
@@ -391,7 +371,6 @@ public class RaycastService
 
         if (t < 0f)
             t = -b + sqrtDisc;
-
         if (t < 0f || t > maxDistance)
             return Float.POSITIVE_INFINITY;
 
@@ -408,13 +387,5 @@ public class RaycastService
             this.tMin = tMin;
             this.tMax = tMax;
         }
-    }
-
-    private static final class RewindEntry
-    {
-        private int userId;
-        private float x;
-        private float y;
-        private float z;
     }
 }

@@ -8,6 +8,8 @@ public final class RaycastHit
     private float distance;
     private final Vector3f point = new Vector3f();
 
+    public Vector3f velocity = new Vector3f();
+
     public void clear()
     {
         hit = false;
