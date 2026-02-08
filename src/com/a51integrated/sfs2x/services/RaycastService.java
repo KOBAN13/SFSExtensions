@@ -4,7 +4,6 @@ import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.*;
 import com.a51integrated.sfs2x.handlers.RewindSnapshotService;
 import org.joml.Math;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,31 +43,15 @@ public class RaycastService
 
     public RaycastHit handleShot(int shooterId, long clientShotSnapshotId, long serverSnapshotId, int clientAlpha, Ray ray)
     {
-        game.trace(
-                "handleShot start: shooterId=" + shooterId
-                        + " clientShotSnapshotId=" + clientShotSnapshotId
-                        + " serverSnapshotId=" + serverSnapshotId
-                        + " clientAlpha=" + clientAlpha);
-        game.trace(
-                "handleShot ray: origin=(" + ray.origin.x + "," + ray.origin.y + "," + ray.origin.z + ")"
-                        + " direction=(" + ray.direction.x + "," + ray.direction.y + "," + ray.direction.z + ")"
-                        + " maxDistance=" + ray.maxDistance
-                        + " layerMask=" + ray.layerMask);
-
         allShapes.clear();
         allShapes.addAll(collisionMapService.getShapes());
-
-        Vector3f a = new  Vector3f();
 
         for (var entry : collisionMapService.getPlayerShapeEntries())
         {
             var userId = entry.getKey();
 
             if (userId == shooterId)
-            {
-                game.trace("handleShot skip shooter: userId=" + userId);
                 continue;
-            }
 
             var interpolatedState = rewindSnapshotService
                     .getInterpolatePlayerState(userId, clientShotSnapshotId, serverSnapshotId, clientAlpha);
@@ -81,27 +64,10 @@ public class RaycastService
             center.y = position.y;
             center.z = position.z;
 
-            a.set(position.x, position.y, position.z);
-
             allShapes.add(shapeCopy);
-
-            game.trace(
-                    "handleShot copy: userId=" + userId
-                            + " to=(" + position.x + "," + position.y + "," + position.z + ")");
         }
 
-        game.trace("handleShot shapes: total=" + allShapes.size());
-
-        var hit = raycast(ray, allShapes);
-
-        hit.velocity.set(a.x, a.y, a.z);
-
-        game.trace(
-                "handleShot raycast: hit=" + hit.getHit()
-                        + " distance=" + hit.getDistance()
-                        + " point=(" + hit.getPoint().x + "," + hit.getPoint().y + "," + hit.getPoint().z + ")");
-        game.trace("handleShot end");
-        return hit;
+        return raycast(ray, allShapes);
     }
 
     private RaycastHit raycast(Ray ray, List<CollisionShapeData> shapes)

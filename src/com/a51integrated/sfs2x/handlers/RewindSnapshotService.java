@@ -1,6 +1,5 @@
 package com.a51integrated.sfs2x.handlers;
 
-import com.a51integrated.sfs2x.GameExtension;
 import com.a51integrated.sfs2x.data.InterpolatedState;
 import com.a51integrated.sfs2x.services.SnapshotsHistoryService;
 import org.joml.Math;
@@ -8,15 +7,11 @@ import org.joml.Math;
 public class RewindSnapshotService {
 
     private final SnapshotsHistoryService snapshotsHistoryService;
-    private final GameExtension gameExtension;
-    private final int MAX_REWIND_MS = 400;
-    private int snapshotDeltaMs = 50;
-
     private final InterpolatedState interpolatedState = new InterpolatedState();
+    private final int maxSizeTick = 60;
 
-    public RewindSnapshotService(SnapshotsHistoryService snapshotsHistoryService, GameExtension gameExtension) {
+    public RewindSnapshotService(SnapshotsHistoryService snapshotsHistoryService) {
         this.snapshotsHistoryService = snapshotsHistoryService;
-        this.gameExtension = gameExtension;
     }
 
     public InterpolatedState getInterpolatePlayerState(int userId, long clientSnapshotId, long serverSnapshotId, int clientAlpha)
@@ -29,8 +24,6 @@ public class RewindSnapshotService {
 
         if (pair == null || pair.playerStateFirst == null || pair.playerStateSecond == null)
             return null;
-
-        gameExtension.trace("BaseId: " + baseId + " Time: " + time + " ClientAlpha: " + clientAlpha + " Pair: " + pair.playerStateFirst.snapshotId + " " + pair.playerStateSecond.snapshotId);
 
         interpolatedState.setLerp(pair.playerStateFirst, pair.playerStateSecond, time);
         return interpolatedState;

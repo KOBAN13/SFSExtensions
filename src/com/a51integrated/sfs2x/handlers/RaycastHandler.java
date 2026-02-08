@@ -101,10 +101,6 @@ public class RaycastHandler extends BaseClientRequestHandler
         resultObject.putFloat("yPoint", pointVector.y);
         resultObject.putFloat("zPoint", pointVector.z);
 
-        resultObject.putFloat("testX", raycastHit.velocity.x);
-        resultObject.putFloat("testY", raycastHit.velocity.y);
-        resultObject.putFloat("testZ", raycastHit.velocity.z);
-
         send(SFSResponseHelper.RAYCAST, resultObject, targetUser);
     }
 }

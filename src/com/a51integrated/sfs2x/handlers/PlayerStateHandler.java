@@ -18,10 +18,5 @@ public class PlayerStateHandler extends BaseClientRequestHandler
         playerState.aimDirectionY = data.getFloat("aimDirectionY");
         playerState.aimDirectionZ = data.getFloat("aimDirectionZ");
         playerState.aimPitch = data.getFloat("aimPitch");
-
-        if (data.getBool("isOnGround"))
-        {
-            playerState.isOnGround = true;
-        }
     }
 }
