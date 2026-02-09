@@ -1,10 +1,10 @@
 package com.a51integrated.sfs2x.loop;
 
-import com.a51integrated.sfs2x.GameExtension;
+import com.a51integrated.sfs2x.extensions.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
-import com.a51integrated.sfs2x.services.CollisionMapService;
-import com.a51integrated.sfs2x.services.RoomStateService;
-import com.a51integrated.sfs2x.services.SnapshotsHistoryService;
+import com.a51integrated.sfs2x.services.collision.CollisionMapService;
+import com.a51integrated.sfs2x.services.room.RoomStateService;
+import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

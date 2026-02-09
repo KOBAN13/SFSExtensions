@@ -1,10 +1,10 @@
 package com.a51integrated.sfs2x.loop;
 
-import com.a51integrated.sfs2x.GameExtension;
-import com.a51integrated.sfs2x.data.ServerCollisionData;
+import com.a51integrated.sfs2x.extensions.GameExtension;
+import com.a51integrated.sfs2x.data.collision.ServerCollisionData;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
-import com.a51integrated.sfs2x.services.CollisionMapService;
-import com.a51integrated.sfs2x.services.RoomStateService;
+import com.a51integrated.sfs2x.services.collision.CollisionMapService;
+import com.a51integrated.sfs2x.services.room.RoomStateService;
 import com.smartfoxserver.v2.entities.data.SFSArray;
 import com.smartfoxserver.v2.entities.data.SFSObject;
 
