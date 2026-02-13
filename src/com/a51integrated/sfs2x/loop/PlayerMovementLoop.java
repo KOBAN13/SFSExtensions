@@ -3,6 +3,7 @@ package com.a51integrated.sfs2x.loop;
 import com.a51integrated.sfs2x.extensions.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.collision.CollisionMapService;
+import com.a51integrated.sfs2x.services.precondition.InputCommandProcessor;
 import com.a51integrated.sfs2x.services.room.RoomStateService;
 import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
 import org.joml.Math;
@@ -15,12 +16,13 @@ public class PlayerMovementLoop implements Runnable
     private final RoomStateService roomStateService;
     private final CollisionMapService collisionMapService;
     private final SnapshotsHistoryService snapshotsHistoryService;
+    private final InputCommandProcessor inputCommandProcessor;
 
     private static final float GRAVITY = -9.81f;
     private static final float JUMP_VELOCITY = 8f;
     private static final float MAX_JUMP_HEIGHT = 9f;
 
-    private static final float DELTA_TIME = 0.05f;
+    private static final float DELTA_TIME = 0.033f;
 
     private static final float THRESHOLD = 1.5f;
     private static final float THRESHOLD_SQR = THRESHOLD * THRESHOLD;
@@ -33,13 +35,15 @@ public class PlayerMovementLoop implements Runnable
             GameExtension game,
             RoomStateService roomStateService,
             CollisionMapService collisionMapService,
-            SnapshotsHistoryService snapshotsHistoryService
+            SnapshotsHistoryService snapshotsHistoryService,
+            InputCommandProcessor inputCommandProcessor
     )
     {
         this.game = game;
         this.roomStateService = roomStateService;
         this.collisionMapService = collisionMapService;
         this.snapshotsHistoryService = snapshotsHistoryService;
+        this.inputCommandProcessor = inputCommandProcessor;
     }
 
     @Override
@@ -52,15 +56,18 @@ public class PlayerMovementLoop implements Runnable
 
         for (var user : room.getPlayersList())
         {
-            var playerState = roomStateService.get(user);
             var userId = user.getId();
+
+            var inputFrame = inputCommandProcessor.pollNext(userId);
+
+            var playerState = roomStateService.get(user);
 
             playerState.serverTime = serverTime;
             playerState.snapshotId = snapshotId;
 
-            var targetSpeed = playerState.isRunning ? 8f : 4f;
+            var targetSpeed = inputFrame.isRunning ? 8f : 4f;
 
-            var inputDirection = new Vector3f(playerState.horizontal, 0f, playerState.vertical);
+            var inputDirection = new Vector3f(inputFrame.horizontal, 0f, inputFrame.vertical);
 
             if (inputDirection.lengthSquared() <= 0f)
                 targetSpeed = 0f;
@@ -77,7 +84,7 @@ public class PlayerMovementLoop implements Runnable
 
             if (inputDirection.lengthSquared() > 0f)
             {
-                playerState.rotation = Math.toDegrees(Math.atan2(playerState.horizontal, playerState.vertical)) + playerState.eulerAngleY;
+                playerState.rotation = Math.toDegrees(Math.atan2(inputFrame.horizontal, inputFrame.vertical)) + inputFrame.eulerAngleY;
 
                 targetDirection = new Quaternionf()
                         .rotateY(Math.toRadians(playerState.rotation))
@@ -104,6 +111,8 @@ public class PlayerMovementLoop implements Runnable
                 playerState.x = targetX;
                 playerState.z = targetZ;
             }
+
+            playerState.isJumping = inputFrame.isJumping;
 
             if (playerState.isJumping)
             {
@@ -134,6 +143,13 @@ public class PlayerMovementLoop implements Runnable
             {
                 playerState.isOnGround = false;
             }
+
+            playerState.inputTick = inputFrame.inputTick;
+
+            playerState.aimPitch = inputFrame.aimPitch;
+            playerState.aimDirectionX = inputFrame.aimDirectionX;
+            playerState.aimDirectionZ = inputFrame.aimDirectionZ;
+            playerState.aimDirectionY = inputFrame.aimDirectionY;
 
             collisionMapService.updatePlayerShapeCenter(
                     playerState.id,

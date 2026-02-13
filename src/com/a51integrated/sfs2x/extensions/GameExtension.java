@@ -3,13 +3,13 @@ package com.a51integrated.sfs2x.extensions;
 import com.a51integrated.sfs2x.handlers.collision.RaycastHandler;
 import com.a51integrated.sfs2x.handlers.game.JoinGameRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.game.LeaveGameRoomServerEventHandler;
-import com.a51integrated.sfs2x.handlers.player.PlayerInputHandler;
-import com.a51integrated.sfs2x.handlers.player.PlayerStateHandler;
+import com.a51integrated.sfs2x.handlers.player.PredictionPlayerHandler;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.loop.CollisionDataLoop;
 import com.a51integrated.sfs2x.loop.PlayerMovementLoop;
 import com.a51integrated.sfs2x.services.collision.CollisionMapService;
 import com.a51integrated.sfs2x.services.collision.RewindSnapshotService;
+import com.a51integrated.sfs2x.services.precondition.InputCommandProcessor;
 import com.a51integrated.sfs2x.services.room.RoomStateService;
 import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
 import com.smartfoxserver.v2.SmartFoxServer;
@@ -24,6 +24,7 @@ public class GameExtension extends SFSExtension
     private CollisionMapService collisionMapService;
     private final SnapshotsHistoryService snapshotsHistoryService = new SnapshotsHistoryService();
     private final RewindSnapshotService rewindSnapshotService = new RewindSnapshotService(snapshotsHistoryService);
+    private final InputCommandProcessor inputCommandProcessor = new InputCommandProcessor();
     private ScheduledFuture<?> gameLoop;
     private ScheduledFuture<?> colliderDebug;
 
@@ -47,14 +48,13 @@ public class GameExtension extends SFSExtension
 
         var sfs = SmartFoxServer.getInstance();
 
-        addRequestHandler(SFSResponseHelper.PLAYER_INPUT, PlayerInputHandler.class);
-        addRequestHandler(SFSResponseHelper.PLAYER_CLIENT_STATE, PlayerStateHandler.class);
+        addRequestHandler(SFSResponseHelper.PLAYER_PRECONDITION_STATE, new PredictionPlayerHandler(inputCommandProcessor));
         addRequestHandler(SFSResponseHelper.RAYCAST, new RaycastHandler(collisionMapService, roomStateService));
         addEventHandler(SFSEventType.USER_JOIN_ROOM, new JoinGameRoomServerEventHandler(collisionMapService));
-        addEventHandler(SFSEventType.USER_LEAVE_ROOM, new LeaveGameRoomServerEventHandler(collisionMapService, snapshotsHistoryService));
+        addEventHandler(SFSEventType.USER_LEAVE_ROOM, new LeaveGameRoomServerEventHandler(collisionMapService, snapshotsHistoryService, inputCommandProcessor));
 
         gameLoop = sfs.getTaskScheduler().scheduleAtFixedRate(
-                new PlayerMovementLoop(this, roomStateService, collisionMapService, snapshotsHistoryService),
+                new PlayerMovementLoop(this, roomStateService, collisionMapService, snapshotsHistoryService, inputCommandProcessor),
                 0,
                 33,
                 TimeUnit.MILLISECONDS

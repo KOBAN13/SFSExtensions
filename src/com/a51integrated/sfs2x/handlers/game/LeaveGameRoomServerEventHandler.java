@@ -4,6 +4,7 @@ import com.a51integrated.sfs2x.extensions.GameExtension;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.collision.CollisionMapService;
 import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
+import com.a51integrated.sfs2x.services.precondition.InputCommandProcessor;
 import com.smartfoxserver.v2.core.ISFSEvent;
 import com.smartfoxserver.v2.core.SFSEventParam;
 import com.smartfoxserver.v2.entities.Room;
@@ -16,14 +17,16 @@ public class LeaveGameRoomServerEventHandler extends BaseServerEventHandler
 {
     private final CollisionMapService collisionMapService;
     private final SnapshotsHistoryService snapshotsHistoryService;
+    private final InputCommandProcessor inputCommandProcessor;
 
     public LeaveGameRoomServerEventHandler(
             CollisionMapService collisionMapService,
-            SnapshotsHistoryService snapshotsHistoryService
+            SnapshotsHistoryService snapshotsHistoryService, InputCommandProcessor inputCommandProcessor
     )
     {
         this.collisionMapService = collisionMapService;
         this.snapshotsHistoryService = snapshotsHistoryService;
+        this.inputCommandProcessor = inputCommandProcessor;
     }
 
     @Override
@@ -43,6 +46,7 @@ public class LeaveGameRoomServerEventHandler extends BaseServerEventHandler
         gameExtension.getRoomStateService().remove(user);
         collisionMapService.removePlayerShape(userId);
         snapshotsHistoryService.removePlayer(userId);
+        inputCommandProcessor.removePlayer(userId);
 
         playersInRoom.remove(userId);
 

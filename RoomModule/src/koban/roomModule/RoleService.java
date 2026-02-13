@@ -1,4 +1,4 @@
-package koban.roomModule.permissions;
+package koban.roomModule;
 
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;

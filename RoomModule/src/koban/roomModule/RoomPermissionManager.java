@@ -1,4 +1,4 @@
-package koban.roomModule.permissions;
+package koban.roomModule;
 
 import java.util.HashMap;
 import java.util.Map;

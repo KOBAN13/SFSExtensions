@@ -1,4 +1,4 @@
-package koban.roomModule.permissions;
+package koban.roomModule;
 
 public enum ERoomRole
 {

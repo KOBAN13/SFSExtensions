@@ -4,6 +4,7 @@ public class PlayerState
 {
     public final int id;
 
+    public long inputTick;
     public long snapshotId;
     public float serverTime;
     public float rotation;
@@ -22,6 +23,7 @@ public class PlayerState
     public void copyFrom(PlayerState other)
     {
         snapshotId = other.snapshotId;
+        inputTick = other.inputTick;
         serverTime = other.serverTime;
         rotation = other.rotation;
         eulerAngleY = other.eulerAngleY;

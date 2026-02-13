@@ -39,6 +39,7 @@ public class RoomStateService
             var item = new SFSObject();
             item.putInt("userId", playerState.id);
             item.putLong("snapshotId", playerState.snapshotId);
+            item.putLong("lastProcessedInputSequence", playerState.inputTick);
             item.putFloat("x", playerState.x);
             item.putFloat("y", playerState.y);
             item.putFloat("z", playerState.z);

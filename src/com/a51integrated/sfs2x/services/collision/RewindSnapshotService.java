@@ -1,7 +1,6 @@
 package com.a51integrated.sfs2x.services.collision;
 
 import com.a51integrated.sfs2x.data.state.InterpolatedState;
-import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
 import org.joml.Math;
 
 public class RewindSnapshotService {
@@ -18,7 +17,7 @@ public class RewindSnapshotService {
     {
         interpolatedState.clear();
 
-        var baseId = clampBaseId(clientSnapshotId, serverSnapshotId, 60);
+        var baseId = clampBaseId(clientSnapshotId, serverSnapshotId, maxSizeTick);
         var time = Math.clamp(0, 1, alpha01(clientAlpha));
         var pair = snapshotsHistoryService.getPair(userId, baseId);
 

@@ -27,6 +27,7 @@ public class SFSResponseHelper
     public static final String PLAYER_INPUT = "playerInput";
     public static final String PLAYER_CLIENT_STATE = "playerClientState";
     public static final String PLAYER_SERVER_STATE = "playerServerState";
+    public static final String PLAYER_PRECONDITION_STATE = "playerPreconditionState";
 
     public static final String PLAYER_COLLIDER_DATA = "playerColliderData";
     public static final String COLLISION_DATA = "collisionData";
