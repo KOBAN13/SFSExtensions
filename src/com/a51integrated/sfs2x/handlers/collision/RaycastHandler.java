@@ -5,7 +5,6 @@ import com.a51integrated.sfs2x.data.collision.RaycastHit;
 import com.a51integrated.sfs2x.helpers.SFSResponseHelper;
 import com.a51integrated.sfs2x.services.collision.CollisionMapService;
 import com.a51integrated.sfs2x.services.room.RoomStateService;
-import com.a51integrated.sfs2x.services.collision.SnapshotsHistoryService;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.entities.data.SFSObject;

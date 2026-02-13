@@ -39,6 +39,8 @@ public class GameExtension extends SFSExtension
     @Override
     public void init()
     {
+        trace("Initializing GameExtension");
+
         var room = getParentRoom();
         roomStateService = new RoomStateService(room);
 

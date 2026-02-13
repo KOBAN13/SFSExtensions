@@ -23,7 +23,7 @@ public class PredictionPlayerHandler extends BaseClientRequestHandler {
             var input = inputsBuffer.getSFSObject(i);
             var inputFrame = new InputFrame();
 
-            inputFrame.inputTick = input.getInt("inputTick");
+            inputFrame.inputTick = input.getLong("inputTick");
 
             inputFrame.horizontal = input.getFloat("horizontal");
             inputFrame.vertical = input.getFloat("vertical");
