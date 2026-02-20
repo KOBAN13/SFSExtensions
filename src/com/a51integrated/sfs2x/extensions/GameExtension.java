@@ -1,6 +1,7 @@
 package com.a51integrated.sfs2x.extensions;
 
 import com.a51integrated.sfs2x.handlers.collision.RaycastHandler;
+import com.a51integrated.sfs2x.handlers.game.DisconnectGameRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.game.JoinGameRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.game.LeaveGameRoomServerEventHandler;
 import com.a51integrated.sfs2x.handlers.player.PredictionPlayerHandler;
@@ -54,6 +55,7 @@ public class GameExtension extends SFSExtension
         addRequestHandler(SFSResponseHelper.RAYCAST, new RaycastHandler(collisionMapService, roomStateService));
         addEventHandler(SFSEventType.USER_JOIN_ROOM, new JoinGameRoomServerEventHandler(collisionMapService));
         addEventHandler(SFSEventType.USER_LEAVE_ROOM, new LeaveGameRoomServerEventHandler(collisionMapService, snapshotsHistoryService, inputCommandProcessor));
+        addEventHandler(SFSEventType.USER_DISCONNECT, new DisconnectGameRoomServerEventHandler(collisionMapService, snapshotsHistoryService, inputCommandProcessor));
 
         gameLoop = sfs.getTaskScheduler().scheduleAtFixedRate(
                 new PlayerMovementLoop(this, roomStateService, collisionMapService, snapshotsHistoryService, inputCommandProcessor),

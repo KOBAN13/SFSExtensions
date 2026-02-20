@@ -29,6 +29,16 @@ public class RoomStateService
         players.remove(user.getId());
     }
 
+    public void remove(int userId)
+    {
+        players.remove(userId);
+    }
+
+    public boolean hasPlayer(int userId)
+    {
+        return players.containsKey(userId);
+    }
+
     public ISFSObject toSFSObject()
     {
         var sfs = new SFSObject();

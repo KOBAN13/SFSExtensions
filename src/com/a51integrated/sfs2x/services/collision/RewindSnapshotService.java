@@ -28,7 +28,6 @@ public class RewindSnapshotService {
         return interpolatedState;
     }
 
-
     private long clampBaseId(long clientBaseId, long nowId, int maxSizeTick) {
         var minId = nowId - (maxSizeTick - 2);
 
