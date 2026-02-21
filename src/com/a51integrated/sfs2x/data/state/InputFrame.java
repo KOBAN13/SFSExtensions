@@ -9,6 +9,7 @@ public class InputFrame
     public float horizontal, vertical;
     public boolean isJumping;
     public boolean isRunning;
+    public boolean isAim;
     public float aimDirectionX, aimDirectionY, aimDirectionZ;
     public float aimPitch;
 }

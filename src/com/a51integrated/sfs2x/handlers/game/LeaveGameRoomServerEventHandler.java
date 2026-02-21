@@ -57,8 +57,6 @@ public class LeaveGameRoomServerEventHandler extends BaseServerEventHandler
         result.putBool(SFSResponseHelper.OK, true);
         result.putInt(SFSResponseHelper.USER_ID, userId);
 
-        trace("LeaveGameRoomServerEventHandler.handleServerEvent");
-
         send(SFSResponseHelper.PLAYER_LEAVE_GAME_ROOM, result, playersInRoom);
     }
 }

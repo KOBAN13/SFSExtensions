@@ -36,6 +36,7 @@ public class PredictionPlayerHandler extends BaseClientRequestHandler {
             inputFrame.aimDirectionY = input.getFloat("aimDirectionY");
             inputFrame.aimDirectionZ = input.getFloat("aimDirectionZ");
             inputFrame.aimPitch = input.getFloat("aimPitch");
+            inputFrame.isAim = input.getBool("isAim");
 
             inputCommandProcessor.AddInputFrame(sender.getId(), inputFrame);
         }

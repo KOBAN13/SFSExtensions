@@ -163,6 +163,7 @@ public class PlayerMovementLoop implements Runnable
                 playerState.aimDirectionX = inputFrame.aimDirectionX;
                 playerState.aimDirectionZ = inputFrame.aimDirectionZ;
                 playerState.aimDirectionY = inputFrame.aimDirectionY;
+                playerState.isAim = inputFrame.isAim;
 
                 collisionMapService.updatePlayerShapeCenter(
                         playerState.id,
@@ -197,6 +198,7 @@ public class PlayerMovementLoop implements Runnable
         inputFrame.aimDirectionY = playerState.aimDirectionY;
         inputFrame.aimDirectionZ = playerState.aimDirectionZ;
         inputFrame.aimPitch = playerState.aimPitch;
+        inputFrame.isAim = playerState.isAim;
         return inputFrame;
     }
 }

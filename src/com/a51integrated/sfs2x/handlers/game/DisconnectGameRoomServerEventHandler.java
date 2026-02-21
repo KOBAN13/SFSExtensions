@@ -55,8 +55,6 @@ public class DisconnectGameRoomServerEventHandler extends BaseServerEventHandler
         var playersInRoom = roomStateService.getRoom().getPlayersList();
         playersInRoom.remove(user);
 
-        trace("DisconnectGameRoomServerEventHandler.handleServerEvent");
-
         send(SFSResponseHelper.PLAYER_LEAVE_GAME_ROOM, result, playersInRoom);
     }
 }

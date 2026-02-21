@@ -15,6 +15,7 @@ public class PlayerState
     public boolean isJumping;
     public boolean isRunning;
     public boolean isOnGround;
+    public boolean isAim;
     public String animationState;
     public float aimDirectionX, aimDirectionY, aimDirectionZ;
     public float aimPitch;
@@ -41,6 +42,7 @@ public class PlayerState
         aimDirectionY = other.aimDirectionY;
         aimDirectionZ = other.aimDirectionZ;
         aimPitch = other.aimPitch;
+        isAim = other.isAim;
         x = other.x;
         y = other.y;
         z = other.z;
