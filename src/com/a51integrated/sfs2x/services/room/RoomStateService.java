@@ -63,7 +63,8 @@ public class RoomStateService
             item.putFloat("aimDirectionX", playerState.aimDirectionX);
             item.putFloat("aimDirectionY", playerState.aimDirectionY);
             item.putFloat("aimDirectionZ", playerState.aimDirectionZ);
-            item.putFloat("aimPitch",  playerState.aimPitch);
+            item.putFloat("aimPitch", playerState.aimPitch);
+            item.putBool("isAim", playerState.isAim);
 
             sfsArray.addSFSObject(item);
         }

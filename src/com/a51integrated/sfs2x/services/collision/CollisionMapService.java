@@ -1,13 +1,14 @@
 package com.a51integrated.sfs2x.services.collision;
 
+import com.a51integrated.sfs2x.data.math.Ray;
 import com.a51integrated.sfs2x.extensions.GameExtension;
 import com.a51integrated.sfs2x.data.collision.CollisionMapPayload;
 import com.a51integrated.sfs2x.data.collision.CollisionShapeData;
 import com.a51integrated.sfs2x.data.collision.ECollisionCategory;
 import com.a51integrated.sfs2x.data.collision.PlayerCollider;
 import com.a51integrated.sfs2x.data.math.Vector3;
-import com.a51integrated.sfs2x.services.collision.RewindSnapshotService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.joml.Vector3f;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class CollisionMapService
 
         this.gameExtension = game;
 
-        var collisionMapPayload = DeserializeCollisionMap(path);
+        var collisionMapPayload = deserializeCollisionMap(path);
 
         assert collisionMapPayload != null;
 
@@ -101,9 +102,28 @@ public class CollisionMapService
         return new ArrayList<>(playerShapes.values());
     }
 
-    public Iterable<Map.Entry<Integer, CollisionShapeData>> getPlayerShapeEntries()
-    {
+    public Iterable<Map.Entry<Integer, CollisionShapeData>> getPlayerShapeEntries() {
         return playerShapes.entrySet();
+    }
+
+    public boolean isGround(float px, float py, float pz)
+    {
+        playerCollider.set(px, py, pz, playerRadius, playerHeight);
+
+        var groundLayerMask = layerCategoryMapService.getLayerMask(shapes, ECollisionCategory.Ground, ECollisionCategory.Obstacle);
+
+        if (groundLayerMask == 0)
+            return false;
+
+        var ray = new Ray();
+        ray.direction = new Vector3f(0f, 1f, 0f);
+        ray.origin = new Vector3f(playerCollider.x, playerCollider.y, playerCollider.z);
+        ray.maxDistance = 1f;
+        ray.layerMask = groundLayerMask;
+
+        var raycastHit = raycastService.raycast(ray, shapes);
+
+        return raycastHit.getHit();
     }
 
     public boolean isColliding(int userId, float px, float py, float pz)
@@ -154,7 +174,7 @@ public class CollisionMapService
         return aabbService.collisionCapsuleWithBox(shape, playerCollider);
     }
 
-    private CollisionMapPayload DeserializeCollisionMap(String path)
+    private CollisionMapPayload deserializeCollisionMap(String path)
     {
         var file = new File(path);
         var mapper = new ObjectMapper();

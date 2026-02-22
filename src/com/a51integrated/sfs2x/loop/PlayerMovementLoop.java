@@ -119,6 +119,11 @@ public class PlayerMovementLoop implements Runnable
 
                 var isColliding = collisionMapService.isColliding(userId, targetX, baseY, targetZ);
 
+                var isGround = collisionMapService.isGround(targetX, baseY, targetZ);
+
+                game.trace("isColliding " + isColliding + " isGround " + isGround);
+                playerState.isOnGround = isGround;
+
                 if (!isColliding)
                 {
                     playerState.x = targetX;
@@ -132,7 +137,6 @@ public class PlayerMovementLoop implements Runnable
                     if (playerState.isOnGround)
                     {
                         playerState.verticalVelocity = JUMP_VELOCITY;
-                        playerState.isOnGround = false;
                     }
                     playerState.isJumping = false;
                 }

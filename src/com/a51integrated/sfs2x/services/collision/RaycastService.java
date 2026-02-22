@@ -73,7 +73,7 @@ public class RaycastService
         return raycast(ray, allShapes);
     }
 
-    private RaycastHit raycast(Ray ray, List<CollisionShapeData> shapes)
+    public RaycastHit raycast(Ray ray, List<CollisionShapeData> shapes)
     {
         bestHit.clear();
 
