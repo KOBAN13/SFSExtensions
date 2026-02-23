@@ -11,6 +11,8 @@ import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import org.joml.Vector3f;
 
+import java.util.List;
+
 public class RaycastHandler extends BaseClientRequestHandler
 {
     private final CollisionMapService collisionMapService;
@@ -71,7 +73,11 @@ public class RaycastHandler extends BaseClientRequestHandler
 
         var raycastHit = raycastService.handleShot(sender.getId(), snapshotId, playerState.snapshotId, shotAlpha, ray);
 
-        sendSuccess(result, raycastHit, sender);
+        var playerList = sender.getLastJoinedRoom().getPlayersList();
+        playerList.remove(sender);
+
+        sendSuccessAllPlayersRoomExcludingSender(result, raycastHit, playerList);
+        sendSuccessSender(result, raycastHit, sender);
     }
 
     private void sendError(SFSObject resultObject, String message, User sender)
@@ -81,7 +87,12 @@ public class RaycastHandler extends BaseClientRequestHandler
         send(SFSResponseHelper.RAYCAST, resultObject, sender);
     }
 
-    private void sendSuccess(SFSObject resultObject, RaycastHit raycastHit, User targetUser)
+    private void sendSuccessSender(SFSObject resultObject, RaycastHit raycastHit, User sender)
+    {
+        send(SFSResponseHelper.RAYCAST_SENDER_ONLY, resultObject, sender);
+    }
+
+    private void sendSuccessAllPlayersRoomExcludingSender(SFSObject resultObject, RaycastHit raycastHit, List<User> targetUser)
     {
         resultObject.putBool(SFSResponseHelper.OK, true);
 
@@ -93,6 +104,6 @@ public class RaycastHandler extends BaseClientRequestHandler
         resultObject.putFloat("yPoint", pointVector.y);
         resultObject.putFloat("zPoint", pointVector.z);
 
-        send(SFSResponseHelper.RAYCAST, resultObject, targetUser);
+        send(SFSResponseHelper.RAYCAST_EXCLUDE_SENDER, resultObject, targetUser);
     }
 }

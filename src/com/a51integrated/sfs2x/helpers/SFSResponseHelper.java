@@ -31,6 +31,9 @@ public class SFSResponseHelper
 
     public static final String PLAYER_COLLIDER_DATA = "playerColliderData";
     public static final String COLLISION_DATA = "collisionData";
+
     public static final String RAYCAST = "raycast";
+    public static final String RAYCAST_EXCLUDE_SENDER = "raycastExcludeSender";
+    public static final String RAYCAST_SENDER_ONLY = "raycastSenderOnly";
 }
 
