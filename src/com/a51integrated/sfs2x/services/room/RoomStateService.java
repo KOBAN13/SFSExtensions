@@ -14,28 +14,23 @@ public class RoomStateService
     private final ConcurrentHashMap<Integer, PlayerState> players = new ConcurrentHashMap<>();
     private final Room room;
 
-    public RoomStateService(Room room)
-    {
+    public RoomStateService(Room room) {
         this.room = room;
     }
 
-    public PlayerState get(User user)
-    {
+    public PlayerState get(User user) {
         return players.computeIfAbsent(user.getId(), PlayerState::new);
     }
 
-    public void remove(User user)
-    {
+    public void remove(User user) {
         players.remove(user.getId());
     }
 
-    public void remove(int userId)
-    {
+    public void remove(int userId) {
         players.remove(userId);
     }
 
-    public boolean hasPlayer(int userId)
-    {
+    public boolean hasPlayer(int userId) {
         return players.containsKey(userId);
     }
 
@@ -65,6 +60,7 @@ public class RoomStateService
             item.putFloat("aimDirectionZ", playerState.aimDirectionZ);
             item.putFloat("aimPitch", playerState.aimPitch);
             item.putBool("isAim", playerState.isAim);
+            item.putBool("isOnGround", playerState.isOnGround);
 
             sfsArray.addSFSObject(item);
         }

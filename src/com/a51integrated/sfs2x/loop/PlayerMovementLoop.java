@@ -119,10 +119,7 @@ public class PlayerMovementLoop implements Runnable
 
                 var isColliding = collisionMapService.isColliding(userId, targetX, baseY, targetZ);
 
-                var isGround = collisionMapService.isGround(targetX, baseY, targetZ);
-
-                game.trace("isColliding " + isColliding + " isGround " + isGround);
-                playerState.isOnGround = isGround;
+                playerState.isOnGround = collisionMapService.isGround(targetX, baseY, targetZ);
 
                 if (!isColliding)
                 {
@@ -154,7 +151,6 @@ public class PlayerMovementLoop implements Runnable
                 {
                     playerState.y = 0f;
                     playerState.verticalVelocity = 0f;
-                    playerState.isOnGround = true;
                 }
                 else
                 {
@@ -177,6 +173,8 @@ public class PlayerMovementLoop implements Runnable
 
                 snapshotsHistoryService.ensurePlayer(userId);
                 snapshotsHistoryService.record(userId, playerState, snapshotId);
+
+                game.trace("isColliding " + isColliding + " isGround " + playerState.isOnGround);
             }
 
             var packet = roomStateService.toSFSObject();
