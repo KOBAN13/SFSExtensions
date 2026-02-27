@@ -173,8 +173,6 @@ public class PlayerMovementLoop implements Runnable
 
                 snapshotsHistoryService.ensurePlayer(userId);
                 snapshotsHistoryService.record(userId, playerState, snapshotId);
-
-                game.trace("isColliding " + isColliding + " isGround " + playerState.isOnGround);
             }
 
             var packet = roomStateService.toSFSObject();

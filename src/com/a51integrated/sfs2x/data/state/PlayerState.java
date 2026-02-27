@@ -16,7 +16,7 @@ public class PlayerState
     public boolean isRunning;
     public boolean isOnGround;
     public boolean isAim;
-    public String animationState;
+    public int animationState;
     public float aimDirectionX, aimDirectionY, aimDirectionZ;
     public float aimPitch;
     public float x, y ,z;
