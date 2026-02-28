@@ -34,7 +34,6 @@ public class JoinGameRoomServerEventHandler extends BaseServerEventHandler
         playerState.x = (float) (Math.random() * 10f);
         playerState.y = 0f;
         playerState.z = (float) (Math.random() * 5f);
-        playerState.animationState = 0;
 
         var result = roomState.toSFSObject();
 

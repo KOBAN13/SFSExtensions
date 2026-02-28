@@ -25,6 +25,7 @@ public class PlayerMovementLoop implements Runnable
     private static final float MAX_JUMP_HEIGHT = 9f;
 
     private static final float DELTA_TIME = 0.033f;
+    private static final float MOVEMENT_EPSILON = 0.001f;
 
     private static final float THRESHOLD = 1.5f;
     private static final float THRESHOLD_SQR = THRESHOLD * THRESHOLD;
@@ -63,6 +64,9 @@ public class PlayerMovementLoop implements Runnable
                 var userId = user.getId();
 
                 var playerState = roomStateService.get(user);
+                var wasRunning = playerState.isRunning;
+                var wasMoving = playerState.horizontalVelocity > MOVEMENT_EPSILON;
+                var wasRunningMotion = wasRunning && wasMoving;
                 var inputFrame = inputCommandProcessor.pollNext(userId);
 
                 if (inputFrame == null)
@@ -127,15 +131,25 @@ public class PlayerMovementLoop implements Runnable
                     playerState.z = targetZ;
                 }
 
-                playerState.isJumping = inputFrame.isJumping;
+                var moveX = playerState.x - baseX;
+                var moveZ = playerState.z - baseZ;
 
-                if (playerState.isJumping)
+                var movedDistance = (float) java.lang.Math.sqrt(moveX * moveX + moveZ * moveZ);
+
+                playerState.horizontalVelocity = movedDistance / DELTA_TIME;
+
+                var isMoving = playerState.horizontalVelocity > MOVEMENT_EPSILON;
+                var isRunningMotion = playerState.isRunning && isMoving;
+
+                playerState.isStartRun = !wasRunningMotion && isRunningMotion;
+                playerState.isEndRun = wasRunningMotion && !isRunningMotion;
+
+                if (inputFrame.isJumping)
                 {
                     if (playerState.isOnGround)
                     {
                         playerState.verticalVelocity = JUMP_VELOCITY;
                     }
-                    playerState.isJumping = false;
                 }
 
                 playerState.verticalVelocity += GRAVITY * DELTA_TIME;
@@ -156,6 +170,8 @@ public class PlayerMovementLoop implements Runnable
                 {
                     playerState.isOnGround = false;
                 }
+
+                playerState.isJumping = !playerState.isOnGround;
 
                 playerState.inputTick = inputFrame.inputTick;
 

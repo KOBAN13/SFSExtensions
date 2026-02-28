@@ -103,12 +103,9 @@ public class RaycastService
             if (!raycastShape(ray.maxDistance, shape, closestHit))
                 continue;
 
-            game.trace("Shape: " + shape.Name);
-
             if (!bestHit.getHit() || closestHit.getDistance() < bestHit.getDistance())
             {
                 bestHit.copyFrom(closestHit);
-                game.trace("Found: " + shape.Name);
             }
         }
 

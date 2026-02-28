@@ -54,11 +54,15 @@ public class RoomStateService
             item.putLong("snapshot", playerState.snapshotId);
             item.putFloat("serverTime", playerState.serverTime);
             item.putFloat("verticalVelocity", playerState.verticalVelocity);
-            item.putInt("animationState", playerState.animationState);
+            item.putFloat("horizontalVelocity", playerState.horizontalVelocity);
             item.putFloat("aimDirectionX", playerState.aimDirectionX);
             item.putFloat("aimDirectionY", playerState.aimDirectionY);
             item.putFloat("aimDirectionZ", playerState.aimDirectionZ);
             item.putFloat("aimPitch", playerState.aimPitch);
+            item.putBool("isJumping", playerState.isJumping);
+            item.putBool("isRunning", playerState.isRunning);
+            item.putBool("isStartRun", playerState.isStartRun);
+            item.putBool("isEndRun", playerState.isEndRun);
             item.putBool("isAim", playerState.isAim);
             item.putBool("isOnGround", playerState.isOnGround);
 
